@@ -1,19 +1,19 @@
 {
-	"name": "gateway",
-	"version": "0.0.0",
-	"private": true,
-	"scripts": {
-		"deploy": "wrangler deploy",
-		"dev": "(kill -9 $(lsof -t -i:7500) || true) && wrangler dev --name user-service --port 7500 --inspector-port 7300  --persist-to=.db-local",
-		"start": "wrangler dev",
-		"test": "vitest",
-		"cf-typegen": "wrangler types"
-	},
-	"devDependencies": {
-		"@cloudflare/vitest-pool-workers": "^0.6.4",
-		"@cloudflare/workers-types": "^4.20250303.0",
-		"typescript": "^5.5.2",
-		"vitest": "~2.1.9",
-		"wrangler": "^3.112.0"
-	}
+  "name": "gateway",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "(kill -9 $(lsof -t -i:7500) || true) && wrangler dev --name gateway --port 7500 --inspector-port 7300",
+    "start": "wrangler dev",
+    "test": "vitest",
+    "cf-typegen": "wrangler types"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.6.4",
+    "@cloudflare/workers-types": "^4.20250303.0",
+    "typescript": "^5.5.2",
+    "vitest": "~2.1.9",
+    "wrangler": "^3.112.0"
+  }
 }
