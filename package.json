@@ -1,0 +1,17 @@
+{
+  "name": "microservices-project",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start-all-server": "./local-server.sh"
+  },
+  "workspaces": [
+    "services/*"
+  ],
+  "repository": "git@github.com:vinodhj/graphql-mesh-microservices.git",
+  "author": "Vinodh <vinodh.jeevanantham@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
