@@ -2,7 +2,7 @@
 . "$(dirname "$0")/_/husky.sh"
 
 # Run format and lint
-yarn run format
+bun run format
 
 # Automatically add any changes made by formatting and linting
 git add .
