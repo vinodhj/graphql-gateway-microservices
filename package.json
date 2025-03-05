@@ -3,15 +3,20 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start-all-server": "./local-server.sh"
+    "start-all-server": "./local-server.sh",
+    "format": "prettier --write \"**/*.{ts,tsx,md,json,mts,d.ts}\" --no-error-on-unmatched-pattern",
+    "prepare": "husky"
   },
   "workspaces": [
-    "services/*"
+    "services/*",
+    "gateway"
   ],
   "repository": "git@github.com:vinodhj/graphql-mesh-microservices.git",
   "author": "Vinodh <vinodh.jeevanantham@gmail.com>",
   "license": "MIT",
+  "dependencies": {},
   "devDependencies": {
-    "concurrently": "^9.1.2"
+    "concurrently": "^9.1.2",
+    "husky": "^9.1.7"
   }
 }
