@@ -3,8 +3,6 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "build": "mesh build",
-    "mesh-dev": "(kill -9 $(lsof -t -i:4000) || true) && mesh dev",
     "dev": "(kill -9 $(lsof -t -i:7500) || true) && wrangler dev --name gateway --port 7500 --inspector-port 7300",
     "deploy": "wrangler deploy",
     "test": "vitest",
@@ -19,8 +17,13 @@
     "wrangler": "^3.112.0"
   },
   "dependencies": {
+    "@graphql-tools/delegate": "^10.2.14",
+    "@graphql-tools/stitch": "^9.4.19",
+    "@graphql-tools/wrap": "^10.0.32",
+    "dataloader": "^2.2.3",
     "gql": "^1.1.2",
     "graphql": "^16.10.0",
-    "graphql-yoga": "^5.13.0"
+    "graphql-tools": "^9.0.16",
+    "graphql-yoga": "^5.13.1"
   }
 }

@@ -3,15 +3,23 @@
  * https://developers.cloudflare.com/workers/wrangler/configuration/
  */
 {
-	"$schema": "../node_modules/wrangler/config-schema.json",
-	"name": "graphql-tools",
-	"main": "src/index.ts",
-	"compatibility_date": "2025-03-03",
-	"observability": {
-		"enabled": true
-	},
-  "compatibility_flags": ["nodejs_compat"]
-  
+  "$schema": "../node_modules/wrangler/config-schema.json",
+  "name": "graphql-tools",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-03-03",
+  "observability": {
+    "enabled": true,
+  },
+  "compatibility_flags": ["nodejs_compat"],
+  "env": {
+    "dev": {
+      "vars": {
+        "USER_SERVICE_URL": "http://localhost:7501/graphql",
+        "EXPENSE_SERVICE_URL": "http://localhost:7502/graphql",
+      },
+    },
+  },
+
   /**
    * Smart Placement
    * Docs: https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
