@@ -7,8 +7,9 @@
 # Example:
 #   ./ws-add-prod.sh gateway user-service expense-service -- @graphql-yoga some-other-package
 #
-# This script treats "gateway" as a special case located at "./gateway", 
-# and any other workspace is assumed to be located under "./services/<workspace-name>".
+# This script treats "gateway" as a special case:
+#   - It will iterate over all subdirectories within "./gateway" (useful when gateway has multiple implementations).
+# Other workspaces are assumed to be located under "./services/<workspace-name>".
 
 if [ "$#" -lt 3 ]; then
   echo "Usage: $0 <workspace-name> [<workspace-name> ...] -- <package> [<package>...]"
@@ -41,17 +42,23 @@ echo "Workspaces: ${workspaces[@]}"
 echo "Packages to add: ${packages[@]}"
 
 for ws in "${workspaces[@]}"; do
-  # If the workspace is "gateway", its path is "./gateway", otherwise it's "./services/<ws>"
   if [ "$ws" = "gateway" ]; then
-    ws_path="gateway"
+    # For the "gateway" workspace, iterate over all subdirectories within the gateway folder.
+    for dir in gateway/*; do
+      if [ -d "$dir" ]; then
+        echo "Installing in workspace: $dir"
+        (cd "$dir" && bun add "${packages[@]}")
+      else
+        echo "No directory found in $dir"
+      fi
+    done
   else
     ws_path="services/$ws"
-  fi
-  
-  if [ -d "$ws_path" ]; then
-    echo "Installing in workspace: $ws_path"
-    (cd "$ws_path" && bun add "${packages[@]}")
-  else
-    echo "Workspace directory not found: $ws_path"
+    if [ -d "$ws_path" ]; then
+      echo "Installing in workspace: $ws_path"
+      (cd "$ws_path" && bun add "${packages[@]}")
+    else
+      echo "Workspace directory not found: $ws_path"
+    fi
   fi
 done
