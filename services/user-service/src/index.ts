@@ -12,7 +12,8 @@ const typeDefs = `
 
   type Query {
     user(id: ID!): User
-    users: [User]
+    users(ids: [ID!]!): [User]! 
+    allUsers: [User]
   }
 
   type Mutation {
@@ -50,11 +51,13 @@ const users = new Map<string, { id: string; name: string; email: string; created
 const resolvers = {
   Query: {
     user: (_: any, { id }: { id: string }) => {
-      return users.get(id) || null;
+      const result = users.get(id) || null;
+      return result;
     },
-    users: () => {
-      return Array.from(users.values());
+    users: (_: any, { ids }: { ids: string[] }) => {
+      return ids.map((id) => users.get(id) || null);
     },
+    allUsers: () => Array.from(users.values()),
   },
   Mutation: {
     createUser: (_: any, { name, email }: { name: string; email: string }) => {

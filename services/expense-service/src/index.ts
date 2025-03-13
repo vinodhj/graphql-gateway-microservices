@@ -16,6 +16,7 @@ const typeDefs = `
     expense(id: ID!): Expense
     expenses: [Expense]
     expensesByUser(userId: ID!): [Expense]
+    expensesByUsers(userIds: [ID!]!): [Expense]! # New batch endpoint
     expensesByDate(startDate: String!, endDate: String): [Expense]
   }
 
@@ -89,6 +90,9 @@ const resolvers = {
     },
     expensesByUser: (_: any, { userId }: { userId: string }) => {
       return Array.from(expenses.values()).filter((expense) => expense.userId === userId);
+    },
+    expensesByUsers: (_: any, { userIds }: { userIds: string[] }) => {
+      return Array.from(expenses.values()).filter((expense) => userIds.includes(expense.userId));
     },
     expensesByDate: (_: any, { startDate, endDate }: { startDate: string; endDate?: string }) => {
       const start = new Date(startDate);

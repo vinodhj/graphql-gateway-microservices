@@ -1,0 +1,44 @@
+schema {
+  query: Query
+  mutation: Mutation
+}
+
+type Query {
+  user(id: ID!): User
+  users(ids: [ID!]!): [User]!
+  allUsers: [User]
+  expense(id: ID!): Expense
+  expenses: [Expense]
+  expensesByUser(userId: ID!): [Expense]
+  expensesByUsers(userIds: [ID!]!): [Expense]!
+  expensesByDate(startDate: String!, endDate: String): [Expense]
+}
+
+type Mutation {
+  createUser(name: String!, email: String!): User
+  updateUser(id: ID!, name: String, email: String): User
+  deleteUser(id: ID!): Boolean
+  createExpense(userId: ID!, amount: Float!, description: String!, category: String, date: String!): Expense
+  updateExpense(id: ID!, amount: Float, description: String, category: String): Expense
+  deleteExpense(id: ID!): Boolean
+}
+
+type User {
+  id: ID!
+  name: String!
+  email: String!
+  createdAt: String!
+  updatedAt: String
+  expenses: [Expense!]!
+}
+
+type Expense {
+  id: ID!
+  userId: ID!
+  amount: Float!
+  description: String!
+  category: String
+  date: String!
+  createdAt: String!
+  user: User!
+}
