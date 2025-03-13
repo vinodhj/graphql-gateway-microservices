@@ -1,18 +1,102 @@
-/**
- * Welcome to Cloudflare Workers! This is your first worker.
- *
- * - Run `npm run dev` in your terminal to start a development server
- * - Open a browser tab at http://localhost:8787/ to see your worker in action
- * - Run `npm run deploy` to publish your worker
- *
- * Bind resources to your worker in `wrangler.jsonc`. After adding bindings, a type definition for the
- * `Env` object can be regenerated with `npm run cf-typegen`.
- *
- * Learn more at https://developers.cloudflare.com/workers/
- */
+import { createSchema, createYoga } from "graphql-yoga";
 
-export default {
-  async fetch(request, env, ctx): Promise<Response> {
-    return new Response("Hello World!");
+// Define User schema
+const typeDefs = `
+  type User {
+    id: ID!
+    name: String!
+    email: String!
+    createdAt: String!
+    updatedAt: String
+  }
+
+  type Query {
+    user(id: ID!): User
+    users: [User]
+  }
+
+  type Mutation {
+    createUser(name: String!, email: String!): User
+    updateUser(id: ID!, name: String, email: String): User
+    deleteUser(id: ID!): Boolean
+  }
+`;
+
+// Sample in-memory database (in production, use Cloudflare KV or D1)
+const users = new Map<string, { id: string; name: string; email: string; createdAt: string; updatedAt: string | null }>([
+  [
+    "1",
+    {
+      id: "1",
+      name: "John Doe",
+      email: "john.doe@example.com",
+      createdAt: new Date().toISOString(),
+      updatedAt: null,
+    },
+  ],
+  [
+    "2",
+    {
+      id: "2",
+      name: "Jane Smith",
+      email: "jane.smith@example.com",
+      createdAt: new Date().toISOString(),
+      updatedAt: null,
+    },
+  ],
+]);
+
+// Define resolvers
+const resolvers = {
+  Query: {
+    user: (_: any, { id }: { id: string }) => {
+      return users.get(id) || null;
+    },
+    users: () => {
+      return Array.from(users.values());
+    },
   },
-} as ExportedHandler<Env>;
+  Mutation: {
+    createUser: (_: any, { name, email }: { name: string; email: string }) => {
+      const id = crypto.randomUUID();
+      const now = new Date().toISOString();
+      const user = { id, name, email, createdAt: now, updatedAt: null };
+      users.set(id, user);
+      return user;
+    },
+    updateUser: (_: any, { id, name, email }: { id: string; name?: string; email?: string }) => {
+      const user = users.get(id);
+      if (!user) return null;
+
+      if (name) user.name = name;
+      if (email) user.email = email;
+      user.updatedAt = new Date().toISOString();
+
+      users.set(id, user);
+      return user;
+    },
+    deleteUser: (_: any, { id }: { id: string }) => {
+      if (!users.has(id)) return false;
+      users.delete(id);
+      return true;
+    },
+  },
+};
+
+// Create schema
+const schema = createSchema({
+  typeDefs,
+  resolvers,
+});
+
+// Create Yoga server
+const yoga = createYoga({
+  schema,
+  landingPage: false,
+  graphiql: true,
+});
+
+// Handle Cloudflare Worker requests
+export default {
+  fetch: yoga.fetch,
+};
