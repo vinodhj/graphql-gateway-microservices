@@ -2,8 +2,14 @@ import { createMeshHTTPHandler } from "@graphql-mesh/http";
 import { getMesh } from "@graphql-mesh/runtime";
 import { createDevTimingHandler } from "./create-dev-timing-handler";
 
+export interface Env {
+  USER_SERVICE_URL: string;
+  EXPENSE_SERVICE_URL: string;
+  WORKER_ENV: string;
+}
+
 export default {
-  async fetch(request: Request, env: any, ctx: ExecutionContext): Promise<Response> {
+  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     try {
       const customGetBuiltMesh = async () => {
         // Import the mesh options but NOT the existing getBuiltMesh
