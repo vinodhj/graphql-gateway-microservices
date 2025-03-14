@@ -1,6 +1,6 @@
 # GraphQL Gateway Microservices
 
-This project demonstrates a proof-of-concept (PoC) for optimizing GraphQL gateway performance by minimizing redundant lookups. It compares two gateway approaches—**GraphQL Mesh** and **schema-stitching using graphql-tools**—to connect two microservices built with Cloudflare Workers.
+This project demonstrates a proof-of-concept (PoC) for optimizing GraphQL gateway performance by minimizing redundant lookups. It compares two gateway approaches—**GraphQL Mesh** and **schema-stitching using graphql-tools** to connect two microservices built with Cloudflare Workers.
 
 ## Project Architecture
 
@@ -32,7 +32,7 @@ Two gateway approaches are implemented for comparison:
   It leverages [graphql-tools](https://www.graphql-tools.com/) to manually stitch schemas together as part of a GraphQL federation setup.
 
 - **Caching Strategies**:  
-  Uses settings such as `schemaCacheTtl` and Service executor timeouts for performance improvements.
+  Uses settings such as `schemaCacheTtl` and service executor timeouts for performance improvements.
 
 - **Optimization**:  
   Integrates DataLoader for batching and deduplication
