@@ -1,5 +1,6 @@
 import { createMeshHTTPHandler } from "@graphql-mesh/http";
 import { getMesh } from "@graphql-mesh/runtime";
+import { createDevTimingHandler } from "./create-dev-timing-handler";
 
 export default {
   async fetch(request: Request, env: any, ctx: ExecutionContext): Promise<Response> {
@@ -14,14 +15,20 @@ export default {
       };
 
       // Create a new handler using our custom function
-      const handler = createMeshHTTPHandler({
+      const meshHandler = createMeshHTTPHandler({
         baseDir: ".",
         getBuiltMesh: customGetBuiltMesh,
         rawServeConfig: undefined,
       });
 
+      // Only add timing handler in development environment
+      const isDevelopment = env.WORKER_ENV === "dev";
+
+      // Use the timing handler in development, raw handler in production
+      const handlerToUse = isDevelopment ? createDevTimingHandler(meshHandler) : meshHandler;
+
       // Handle the request
-      return await handler.fetch(request, env, ctx);
+      return await handlerToUse.fetch(request, env, ctx);
     } catch (error) {
       console.error("Mesh error:", error);
 

@@ -3,6 +3,5 @@
 interface Env {
   USER_SERVICE_URL: string;
   EXPENSE_SERVICE_URL: string;
-  REQUEST_TIMEOUT_MS: string;
-  SCHEMA_CACHE_TTL_MS: string;
+  WORKER_ENV: string;
 }
