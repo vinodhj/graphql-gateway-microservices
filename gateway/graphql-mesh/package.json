@@ -24,7 +24,6 @@
     "@graphql-mesh/graphql": "^0.104.1",
     "dataloader": "^2.2.3",
     "graphql": "^16.10.0",
-    "graphql-mesh": "^0.0.1",
     "graphql-yoga": "^5.13.1"
   }
 }

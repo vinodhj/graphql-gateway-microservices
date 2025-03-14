@@ -55,6 +55,7 @@ const resolvers = {
       return result;
     },
     users: (_: any, { ids }: { ids: string[] }) => {
+      console.log(ids);
       return ids.map((id) => users.get(id) || null);
     },
     allUsers: () => Array.from(users.values()),

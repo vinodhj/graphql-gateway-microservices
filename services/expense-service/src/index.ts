@@ -92,6 +92,7 @@ const resolvers = {
       return Array.from(expenses.values()).filter((expense) => expense.userId === userId);
     },
     expensesByUsers: (_: any, { userIds }: { userIds: string[] }) => {
+      console.log(userIds);
       return Array.from(expenses.values()).filter((expense) => userIds.includes(expense.userId));
     },
     expensesByDate: (_: any, { startDate, endDate }: { startDate: string; endDate?: string }) => {
