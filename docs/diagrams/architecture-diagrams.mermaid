@@ -1,0 +1,45 @@
+graph TD
+    subgraph "Client Applications"
+        Client[Client Application]
+    end
+    
+    subgraph "Gateway Layer"
+        GM[GraphQL Mesh Gateway]
+        GS[Schema-stitching Gateway]
+    end
+    
+    subgraph "Microservices Layer"
+        UserService[User Microservice]
+        ExpenseService[Expense Tracker Microservice]
+    end
+    
+    subgraph "Data Storage"
+        UserDB[(User Database)]
+        ExpenseDB[(Expense Database)]
+    end
+    
+    %% Client connections
+    Client -->|GraphQL Query| GM
+    Client -->|GraphQL Query| GS
+    
+    %% Gateway connections
+    GM -->|Forward Queries| UserService
+    GM -->|Forward Queries| ExpenseService
+    GS -->|Forward Queries| UserService
+    GS -->|Forward Queries| ExpenseService
+    
+    %% Service connections
+    UserService -->|CRUD Operations| UserDB
+    ExpenseService -->|CRUD Operations| ExpenseDB
+    
+    %% Cross-service data requirements
+    ExpenseService -.->|User Data Lookup| UserService
+    
+    %% Labels
+    classDef gateway fill:#f9f,stroke:#333,stroke-width:2px
+    classDef service fill:#bbf,stroke:#333,stroke-width:1px
+    classDef database fill:#dfd,stroke:#333,stroke-width:1px
+    
+    class GM,GS gateway
+    class UserService,ExpenseService service
+    class UserDB,ExpenseDB database

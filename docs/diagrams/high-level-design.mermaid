@@ -1,0 +1,67 @@
+flowchart TD
+    subgraph "Client Layer"
+        Client[Client Application]
+    end
+    
+    subgraph "Gateway Comparison"
+        subgraph "GraphQL Mesh Gateway"
+            GM_Cache[In-memory Cache]
+            GM_DL[DataLoader]
+            GM_Schema[".mesh Generated Schema"]
+            GM_Resolvers["Additional Resolvers.ts"]
+        end
+        
+        subgraph "Schema-stitching Gateway"
+            GS_Cache["Schema Cache (TTL)"]
+            GS_DL[DataLoader]
+            GS_Timeout["Executor Timeouts"]
+            GS_Schema["Manual Schema Stitching"]
+        end
+    end
+    
+    subgraph "Microservices (Cloudflare Workers)"
+        subgraph "User Service"
+            US_Cache[In-memory Cache]
+            US_DL[DataLoader]
+            US_API[GraphQL Yoga Server]
+        end
+        
+        subgraph "Expense Service"
+            ES_Cache[In-memory Cache]
+            ES_DL[DataLoader]
+            ES_API[GraphQL Yoga Server]
+        end
+    end
+    
+    Client --> GM_Schema
+    Client --> GS_Schema
+    
+    GM_Schema --> GM_Resolvers
+    GM_Resolvers --> GM_DL
+    GM_DL --> GM_Cache
+    
+    GS_Schema --> GS_DL
+    GS_DL --> GS_Cache
+    GS_Schema --> GS_Timeout
+    
+    GM_Cache --> US_API
+    GM_Cache --> ES_API
+    
+    GS_Cache --> US_API
+    GS_Cache --> ES_API
+    
+    US_API --> US_DL
+    US_DL --> US_Cache
+    
+    ES_API --> ES_DL
+    ES_DL --> ES_Cache
+    
+    classDef client fill:#f9f9f9,stroke:#333,stroke-width:1px
+    classDef gateway fill:#f9f,stroke:#333,stroke-width:2px
+    classDef service fill:#bbf,stroke:#333,stroke-width:1px
+    classDef optimization fill:#ffd,stroke:#333,stroke-width:1px
+    
+    class Client client
+    class GM_Schema,GM_Resolvers,GS_Schema,GS_Timeout gateway
+    class US_API,ES_API service
+    class GM_Cache,GM_DL,GS_Cache,GS_DL,US_Cache,US_DL,ES_Cache,ES_DL optimization

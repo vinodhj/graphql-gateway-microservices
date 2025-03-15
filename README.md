@@ -68,6 +68,16 @@ project-root/
 - **DataLoader Integration**:  
   DataLoader is used at the service level and in additional resolvers to batch and cache requests within a single GraphQL operation, further reducing the number of external calls.
 
+## Architecture Diagrams
+
+- [GraphQL Gateway Microservices Architecture Diagram](./docs/diagrams/architecture-diagrams.mermaid)
+
+- [Data Flow Diagram](./docs/diagrams/data-flow-diagram.mermaid)
+
+- [High-Level Design (HLD) Diagram](./docs/diagrams/high-level-design.mermaid)
+
+- [Low-Level Design (LLD) Diagram](./docs/diagrams/low-level-design.mermaid)
+
 ## License
 
 This project is licensed under the [MIT License](LICENSE).

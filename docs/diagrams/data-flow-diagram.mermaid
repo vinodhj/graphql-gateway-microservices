@@ -1,0 +1,61 @@
+sequenceDiagram
+    participant Client
+    participant Mesh as GraphQL Mesh Gateway
+    participant Stitching as Schema-stitching Gateway
+    participant UserService
+    participant ExpenseService
+    
+    Client->>+Mesh: GraphQL Query
+    Mesh->>Mesh: Parse & Plan Query
+    
+    alt Query requires User data
+        Mesh->>+UserService: Batch User Requests
+        UserService->>UserService: Check DataLoader Cache
+        
+        alt Cache Hit
+            UserService-->>Mesh: Return Cached Data
+        else Cache Miss
+            UserService->>UserService: Fetch from DB & Cache
+            UserService-->>Mesh: Return Fresh Data
+        end
+    end
+    
+    alt Query requires Expense data
+        Mesh->>+ExpenseService: Batch Expense Requests
+        ExpenseService->>ExpenseService: Check DataLoader Cache
+        
+        alt Cache Hit
+            ExpenseService-->>Mesh: Return Cached Data
+        else Cache Miss
+            ExpenseService->>ExpenseService: Fetch from DB
+            
+            alt Expenses need User data
+                ExpenseService->>+UserService: Batch User Lookup
+                UserService->>UserService: Check DataLoader Cache
+                UserService-->>ExpenseService: Return User Data
+                ExpenseService->>ExpenseService: Cache Results
+            end
+            
+            ExpenseService-->>Mesh: Return Fresh Data
+        end
+    end
+    
+    Mesh-->>Client: Combined Response
+    
+    Note over Client,Mesh: Similar flow for Schema-stitching Gateway
+    
+    Client->>+Stitching: GraphQL Query
+    Stitching->>Stitching: Check Schema Cache TTL
+    Stitching->>Stitching: Plan & Delegate to Services
+    
+    alt Query requires User data
+        Stitching->>+UserService: Batch User Requests (with timeout)
+        UserService-->>Stitching: Return Data
+    end
+    
+    alt Query requires Expense data
+        Stitching->>+ExpenseService: Batch Expense Requests (with timeout)
+        ExpenseService-->>Stitching: Return Data
+    end
+    
+    Stitching-->>Client: Combined Response
