@@ -205,10 +205,10 @@ flowchart TD
 
     J --> K[Return to Client]
 
-    classDef start fill:#f9f9f9,stroke:#333,stroke-width:1px
-    classDef process fill:#bbf,stroke:#333,stroke-width:1px
-    classDef decision fill:#ffd,stroke:#333,stroke-width:1px
-    classDef endNode fill:#dfd,stroke:#333,stroke-width:1px
+    classDef start fill:#f9f9f9,stroke:#333,stroke-width:1px,color:#333
+    classDef process fill:#bbf,stroke:#333,stroke-width:1px,color:#333
+    classDef decision fill:#ffd,stroke:#333,stroke-width:1px,color:#333
+    classDef endNode fill:#dfd,stroke:#333,stroke-width:1px,color:#333
 
     class A start
     class D decision
