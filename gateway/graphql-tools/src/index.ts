@@ -10,6 +10,8 @@ export interface Env {
   EXPENSE_SERVICE_URL: string;
   REQUEST_TIMEOUT_MS?: number;
   SCHEMA_CACHE_TTL_MS?: number;
+  USER_SERVICE_WORKER: string;
+  EXPENSE_SERVICE_WORKER: string;
 }
 
 // Add these interfaces
@@ -56,7 +58,36 @@ let stitchedSchemaCache: {
   expenseTimestamp: number;
 } | null = null;
 
-function createExecutor(serviceUrl: string, serviceName: string, timeout: number, authHeader: string | null): RemoteExecutor {
+// function createExecutor(serviceUrl: string, serviceName: string, timeout: number, authHeader: string | null): RemoteExecutor {
+//   return async ({ document, variables = {} }) => {
+//     const query = typeof document === "string" ? document : print(document);
+//     const headers = {
+//       "Content-Type": "application/json",
+//       ...(authHeader ? { Authorization: authHeader } : {}),
+//     };
+
+//     const response = await fetch(serviceUrl, {
+//       method: "POST",
+//       headers,
+//       body: JSON.stringify({ query, variables }),
+//       signal: AbortSignal.timeout(timeout),
+//     });
+
+//     if (!response.ok) {
+//       throw new Error(`${serviceName} service responded with status ${response.status}`);
+//     }
+
+//     return response.json();
+//   };
+// }
+// Modified to accept either a URL string or a Fetcher object
+function createExecutor(
+  service: Fetcher | string,
+  serviceName: string,
+  timeout: number,
+  authHeader: string | null,
+  env: Env,
+): RemoteExecutor {
   return async ({ document, variables = {} }) => {
     const query = typeof document === "string" ? document : print(document);
     const headers = {
@@ -64,18 +95,41 @@ function createExecutor(serviceUrl: string, serviceName: string, timeout: number
       ...(authHeader ? { Authorization: authHeader } : {}),
     };
 
-    const response = await fetch(serviceUrl, {
-      method: "POST",
-      headers,
-      body: JSON.stringify({ query, variables }),
-      signal: AbortSignal.timeout(timeout),
-    });
+    const body = JSON.stringify({ query, variables });
+    let response;
 
-    if (!response.ok) {
-      throw new Error(`${serviceName} service responded with status ${response.status}`);
+    try {
+      if (typeof service === "string") {
+        // If it's a URL string, use the global fetch
+        response = await fetch(service, {
+          method: "POST",
+          headers,
+          body,
+          signal: AbortSignal.timeout(timeout),
+        });
+      } else {
+        // If it's a service binding, use its fetch method with empty path
+        response = await service.fetch(
+          new Request(serviceName === "USER" ? env.USER_SERVICE_URL : env.EXPENSE_SERVICE_URL, {
+            method: "POST",
+            headers,
+            body,
+          }),
+          {
+            signal: AbortSignal.timeout(timeout),
+          },
+        );
+      }
+
+      if (!response.ok) {
+        throw new Error(`${serviceName} service responded with status ${response.status}`);
+      }
+
+      return response.json();
+    } catch (error) {
+      console.error(`Error executing GraphQL for ${serviceName}:`, error);
+      throw error;
     }
-
-    return response.json();
   };
 }
 
@@ -128,8 +182,8 @@ export default {
       const authHeader = request.headers.get("Authorization");
 
       // Create executors
-      const userExecutor = createExecutor(env.USER_SERVICE_URL, "User", timeout, authHeader);
-      const expenseExecutor = createExecutor(env.EXPENSE_SERVICE_URL, "Expense", timeout, authHeader);
+      const userExecutor = createExecutor(env.USER_SERVICE_WORKER, "USER", timeout, authHeader, env);
+      const expenseExecutor = createExecutor(env.EXPENSE_SERVICE_WORKER, "EXPENSE", timeout, authHeader, env);
 
       // Fetch schemas with concurrency control
       const [userSchemaResult, expenseSchemaResult] = await Promise.all([

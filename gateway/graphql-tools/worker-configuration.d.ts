@@ -5,4 +5,6 @@ interface Env {
   EXPENSE_SERVICE_URL: string;
   REQUEST_TIMEOUT_MS: string;
   SCHEMA_CACHE_TTL_MS: string;
+  USER_SERVICE_WORKER: Fetcher;
+  EXPENSE_SERVICE_WORKER: Fetcher;
 }

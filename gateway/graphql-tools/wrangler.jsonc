@@ -19,6 +19,16 @@
       },
     },
   },
+  "services": [
+    {
+      "binding": "USER_SERVICE_WORKER",
+      "service": "user-service",
+    },
+    {
+      "binding": "EXPENSE_SERVICE_WORKER",
+      "service": "expense-service",
+    },
+  ],
 
   /**
    * Smart Placement
