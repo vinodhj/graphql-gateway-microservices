@@ -1,4 +1,4 @@
-// Create a simple timing handler for development
+// Create a server timing handler for development
 export const createDevTimingHandler = (handler: any) => {
   return {
     fetch: async (request: Request, env: any, ctx: ExecutionContext) => {
@@ -24,9 +24,9 @@ export const createDevTimingHandler = (handler: any) => {
       const duration = Date.now() - startTime;
       if (duration > 100) {
         // Highlight slow queries
-        console.warn(`⚠️ SLOW QUERY: ${operationName} took ${duration}ms`);
+        console.warn(`⚠️ SLOW QUERY(Server processing time): ${operationName} took ${duration}ms`);
       } else {
-        console.log(`Query: ${operationName} execution took ${duration}ms`);
+        console.log(`Server processing time for Query: ${operationName} execution took ${duration}ms`);
       }
 
       return response;
