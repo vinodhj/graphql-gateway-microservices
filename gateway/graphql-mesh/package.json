@@ -1,0 +1,29 @@
+{
+  "name": "graphql-mesh",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "build": "mesh build",
+    "mesh:dev": "mesh dev",
+    "prebuild:mesh": " bun run mesh build --output .mesh",
+    "deploy": "wrangler deploy",
+    "dev": "(kill -9 $(lsof -t -i:7500) || true) && wrangler dev --name graphql-mesh --port 7500 --inspector-port 7300",
+    "start": "wrangler dev",
+    "test": "vitest",
+    "cf-typegen": "wrangler types"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.7.5",
+    "@cloudflare/workers-types": "^4.20250312.0",
+    "typescript": "^5.5.2",
+    "vitest": "~3.0.7",
+    "wrangler": "^3.114.1"
+  },
+  "dependencies": {
+    "@graphql-mesh/cli": "^0.100.1",
+    "@graphql-mesh/graphql": "^0.104.1",
+    "dataloader": "^2.2.3",
+    "graphql": "^16.10.0",
+    "graphql-yoga": "^5.13.1"
+  }
+}

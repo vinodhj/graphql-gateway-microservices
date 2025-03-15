@@ -9,13 +9,14 @@
     "start:all": "./run-server.sh",
     "dev:gateway": "./run-gateway.sh",
     "ws-add-prod": "bash ws-add-prod.sh",
+    "ws-remove-prod": "bash ws-remove-prod.sh",
     "test:all": "./run-test.sh",
     "format": "prettier --write \"**/*.{ts,tsx,md,json,mts,d.ts}\" --no-error-on-unmatched-pattern",
     "prepare": "husky"
   },
   "workspaces": [
     "services/*",
-    "gateway"
+    "gateway/*"
   ],
   "engines": {
     "node": ">=18"

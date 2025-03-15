@@ -17,6 +17,7 @@
     "wrangler": "^3.112.0"
   },
   "dependencies": {
+    "dataloader": "^2.2.3",
     "gql": "^1.1.2",
     "graphql": "^16.10.0",
     "graphql-yoga": "^5.13.0"
