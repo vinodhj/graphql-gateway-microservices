@@ -476,6 +476,10 @@ const yoga = createYoga({
   context: createContext,
   landingPage: false,
   graphiql: true,
+  cors: {
+    origin: "*", // Or specify your mesh worker's domain
+    credentials: true,
+  },
 });
 
 // Handle Cloudflare Worker requests
