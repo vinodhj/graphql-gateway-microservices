@@ -1,4 +1,13 @@
-import { Resolvers } from "../.mesh";
+import { Resolvers, MeshContext, User, Expense } from "../.mesh";
+import DataLoader from "dataloader";
+import { GraphQLResolveInfo } from "graphql";
+import { createUsersLoader } from "./loader/user-by-id-loader";
+import { createExpensesLoader } from "./loader/expenses-by-user-id-loader";
+
+interface ExtendedContext extends MeshContext {
+  expensesLoader?: DataLoader<string, Expense[]>;
+  usersLoader?: DataLoader<string, User | null>;
+}
 
 export const resolvers: Resolvers = {
   User: {
@@ -8,38 +17,12 @@ export const resolvers: Resolvers = {
           id
         }
       `,
-      resolve: async (root, _args, context, info) => {
-        try {
-          const result = await context.ExpenseService.Query.expensesByUsers({
-            root,
-            context,
-            info,
-            key: root.id,
-            argsFromKeys: (keys) => ({ userIds: keys }),
-            valuesFromResults: (data, keys) => {
-              const expensesByUser = new Map<string, any[]>();
-              data.forEach((expense: any) => {
-                const userId = expense.userId;
-                if (!expensesByUser.has(userId)) {
-                  expensesByUser.set(userId, []);
-                }
-                expensesByUser.get(userId)!.push(expense);
-              });
-              return keys.map((userId) => expensesByUser.get(userId) || []);
-            },
-          });
-
-          // Ensure we're returning an array
-          if (result === null || result === undefined) {
-            return []; // Return empty array if no expenses
-          }
-
-          // If result is not iterable, wrap it in an array
-          return Array.isArray(result) ? result : [result];
-        } catch (error) {
-          console.error("Error fetching expenses:", error);
-          return []; // Return empty array on error
+      resolve: async (root: User, _args: {}, context: MeshContext, info: GraphQLResolveInfo): Promise<Expense[]> => {
+        const ctx = context as ExtendedContext;
+        if (!ctx.expensesLoader) {
+          ctx.expensesLoader = createExpensesLoader(context, info);
         }
+        return ctx.expensesLoader.load(root.id);
       },
     },
   },
@@ -50,24 +33,16 @@ export const resolvers: Resolvers = {
           userId
         }
       `,
-      resolve: async (root, _args, context, info) => {
-        try {
-          return await context.UserService.Query.users({
-            root,
-            context,
-            info,
-            key: root.userId,
-            argsFromKeys: (keys) => {
-              return { ids: keys };
-            },
-            valuesFromResults: (data: any) => {
-              return data;
-            },
-          });
-        } catch (error) {
-          console.error(`Error fetching user for expense ${root.id}:`, error);
-          return null; // Return null on error
+      resolve: async (root: Expense, _args: {}, context: MeshContext, info: GraphQLResolveInfo): Promise<User> => {
+        const ctx = context as ExtendedContext;
+        if (!ctx.usersLoader) {
+          ctx.usersLoader = createUsersLoader(context, info);
         }
+        const user = await ctx.usersLoader.load(root.userId);
+        if (!user) {
+          throw new Error(`User not found for userId: ${root.userId}`);
+        }
+        return user;
       },
     },
   },

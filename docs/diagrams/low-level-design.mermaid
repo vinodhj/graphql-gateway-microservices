@@ -1,0 +1,95 @@
+flowchart TB
+    subgraph "GraphQL Mesh Gateway Implementation"
+        GM_Request[Client Request]
+        GM_Parse[Parse Query]
+        GM_Routes[Route to Services]
+        GM_BatchUser[Batch User Requests]
+        GM_BatchExpense[Batch Expense Requests]
+        GM_Response[Combine & Respond]
+    end
+    
+    subgraph "Schema-stitching Gateway Implementation"
+        GS_Request[Client Request]
+        GS_Parse[Parse Query]
+        GS_SchemaCheck[Schema Cache Check]
+        GS_Delegate[Delegate to Services]
+        GS_BatchUser[Batch User Requests]
+        GS_BatchExpense[Batch Expense Requests]
+        GS_Response[Combine & Respond]
+    end
+    
+    subgraph "User Service"
+        US_Endpoint[GraphQL Endpoint]
+        US_Resolver[Resolve Query]
+        US_DL[DataLoader]
+        US_Cache[In-memory Cache]
+        US_DB[(User Database)]
+        US_Response[Service Response]
+    end
+    
+    subgraph "Expense Service"
+        ES_Endpoint[GraphQL Endpoint]
+        ES_Resolver[Resolve Query]
+        ES_DL[DataLoader]
+        ES_Cache[In-memory Cache]
+        ES_DB[(Expense Database)]
+        ES_UserLookup[User Info Lookup]
+        ES_Response[Service Response]
+    end
+    
+    %% GraphQL Mesh flow
+    GM_Request --> GM_Parse
+    GM_Parse --> GM_Routes
+    GM_Routes --> GM_BatchUser
+    GM_Routes --> GM_BatchExpense
+    GM_BatchUser --> GM_Response
+    GM_BatchExpense --> GM_Response
+    
+    %% Schema-stitching flow
+    GS_Request --> GS_Parse
+    GS_Parse --> GS_SchemaCheck
+    GS_SchemaCheck --> GS_Delegate
+    GS_Delegate --> GS_BatchUser
+    GS_Delegate --> GS_BatchExpense
+    GS_BatchUser --> GS_Response
+    GS_BatchExpense --> GS_Response
+    
+    %% User Service flow
+    US_Endpoint --> US_Resolver
+    US_Resolver --> US_DL
+    US_DL --> US_Cache
+    US_Cache --> US_DB
+    US_DB --> US_Response
+    
+    %% Cache miss path
+    US_DL -.-> US_DB
+    
+    %% Expense Service flow
+    ES_Endpoint --> ES_Resolver
+    ES_Resolver --> ES_DL
+    ES_DL --> ES_Cache
+    ES_Cache --> ES_DB
+    ES_Resolver --> ES_UserLookup
+    ES_UserLookup -.-> US_Endpoint
+    ES_DB --> ES_Response
+    
+    %% Cache miss path
+    ES_DL -.-> ES_DB
+    
+    %% Gateway to Service connections
+    GM_BatchUser --> US_Endpoint
+    GM_BatchExpense --> ES_Endpoint
+    GS_BatchUser --> US_Endpoint
+    GS_BatchExpense --> ES_Endpoint
+    
+    classDef request fill:#f9f9f9,stroke:#333,stroke-width:1px
+    classDef process fill:#bbf,stroke:#333,stroke-width:1px
+    classDef optimization fill:#ffd,stroke:#333,stroke-width:1px
+    classDef response fill:#dfd,stroke:#333,stroke-width:1px
+    classDef database fill:#90ee90,stroke:#333,stroke-width:1px
+    
+    class GM_Request,GS_Request,US_Endpoint,ES_Endpoint request
+    class GM_Parse,GM_Routes,GS_Parse,GS_SchemaCheck,GS_Delegate,US_Resolver,ES_Resolver,ES_UserLookup process
+    class GM_BatchUser,GM_BatchExpense,GS_BatchUser,GS_BatchExpense,US_DL,US_Cache,ES_DL,ES_Cache optimization
+    class GM_Response,GS_Response,US_Response,ES_Response response
+    class US_DB,ES_DB database
