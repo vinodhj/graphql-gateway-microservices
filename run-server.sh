@@ -6,4 +6,3 @@ set -e
 concurrently --kill-others \
   "cd services/user-service && bun dev" \
   "cd services/expense-service && bun dev"
-  # "cd ./gateway && bun dev"
