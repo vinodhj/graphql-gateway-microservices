@@ -51,7 +51,7 @@ flowchart TD
    Client([Client Applications]) --> MeshGateway
    Client --> StitchingGateway
 
-   subgraph "Gateway Layer (Cloudflare Workers)"
+   subgraph GatewayLayer["Gateway Layer (Cloudflare Workers)"]
        MeshGateway[GraphQL Mesh Gateway]
        StitchingGateway[Schema-Stitching Gateway]
    end
@@ -61,14 +61,14 @@ flowchart TD
    StitchingGateway --> UserService
    StitchingGateway --> ExpenseService
 
-   subgraph "Microservices (Cloudflare Workers)"
-       subgraph "User Service"
+   subgraph MicroservicesLayer["Microservices (Cloudflare Workers)"]
+       subgraph UserServiceBlock["User Service"]
            UserService[GraphQL Yoga Server]
            UserDL[DataLoader]
            UserCache[In-memory Cache]
        end
 
-       subgraph "Expense Service"
+       subgraph ExpenseServiceBlock["Expense Service"]
            ExpenseService[GraphQL Yoga Server]
            ExpenseDL[DataLoader]
            ExpenseCache[In-memory Cache]
