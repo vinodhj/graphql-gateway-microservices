@@ -1,0 +1,19 @@
+sources:
+  - name: UserService
+    handler:
+      graphql:
+        endpoint: "http://localhost:7501/graphql"
+  - name: ExpenseService
+    handler:
+      graphql:
+        endpoint: "http://localhost:7502/graphql"
+
+additionalTypeDefs: |
+  extend type User {
+    expenses: [Expense!]!
+  }
+  extend type Expense {
+    user: User!
+  }
+additionalResolvers:
+  - "./src/additional-resolvers.ts"

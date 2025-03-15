@@ -1,11 +1,11 @@
 #!/bin/bash
-# ws-add-prod.sh: Installs one or more production dependencies into multiple specified workspaces.
+# ws-remove-prod.sh: Removes one or more production dependencies from multiple specified workspaces.
 #
 # Usage:
-#   ./ws-add-prod.sh <workspace-name> [<workspace-name> ...] -- <package> [<package>...]
+#   ./ws-remove-prod.sh <workspace-name> [<workspace-name> ...] -- <package> [<package>...]
 #
 # Example:
-#   ./ws-add-prod.sh gateway user-service expense-service -- @graphql-yoga some-other-package
+#   ./ws-remove-prod.sh gateway user-service expense-service -- @graphql-yoga some-other-package
 #
 # This script treats "gateway" as a special case:
 #   - It will iterate over all subdirectories within "./gateway" (useful when gateway has multiple implementations).
@@ -39,15 +39,15 @@ if [ "${#workspaces[@]}" -eq 0 ] || [ "${#packages[@]}" -eq 0 ]; then
 fi
 
 echo "Workspaces: ${workspaces[@]}"
-echo "Packages to add: ${packages[@]}"
+echo "Packages to remove: ${packages[@]}"
 
 for ws in "${workspaces[@]}"; do
   if [ "$ws" = "gateway" ]; then
     # For the "gateway" workspace, iterate over all subdirectories within the gateway folder.
     for dir in gateway/*; do
       if [ -d "$dir" ]; then
-        echo "Installing in workspace: $dir"
-        (cd "$dir" && bun add "${packages[@]}")
+        echo "Removing packages in workspace: $dir"
+        (cd "$dir" && bun remove "${packages[@]}")
       else
         echo "No directory found in $dir"
       fi
@@ -55,8 +55,8 @@ for ws in "${workspaces[@]}"; do
   else
     ws_path="services/$ws"
     if [ -d "$ws_path" ]; then
-      echo "Installing in workspace: $ws_path"
-      (cd "$ws_path" && bun add "${packages[@]}")
+      echo "Removing packages in workspace: $ws_path"
+      (cd "$ws_path" && bun remove "${packages[@]}")
     else
       echo "Workspace directory not found: $ws_path"
     fi
