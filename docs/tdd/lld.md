@@ -165,10 +165,10 @@ flowchart TD
     J --> K[Return Results to Requester]
     E --> K
 
-    classDef start fill:#f9f9f9,stroke:#333,stroke-width:1px,color:#fff
-    classDef process fill:#bbf,stroke:#333,stroke-width:1px,color:#fff
-    classDef decision fill:#ffd,stroke:#333,stroke-width:1px,color:#fff
-    classDef endNode fill:#dfd,stroke:#333,stroke-width:1px,color:#fff
+    classDef start fill:#f9f9f9,stroke:#333,stroke-width:1px,color:#333
+    classDef process fill:#bbf,stroke:#333,stroke-width:1px,color:#333
+    classDef decision fill:#ffd,stroke:#333,stroke-width:1px,color:#333
+    classDef endNode fill:#dfd,stroke:#333,stroke-width:1px,color:#333
 
     class A start
     class B,D,G decision
