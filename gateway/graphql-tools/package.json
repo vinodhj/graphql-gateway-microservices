@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "dev": "(kill -9 $(lsof -t -i:7500) || true) && wrangler dev --name gateway --port 7500 --inspector-port 7300",
+    "dev": "(kill -9 $(lsof -t -i:7500) || true) && wrangler dev --name graphql-tools --port 7500 --inspector-port 7300",
     "deploy": "wrangler deploy",
     "test": "vitest",
     "cf-typegen": "wrangler types"

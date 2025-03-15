@@ -3,10 +3,10 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "build": "mesh build",
+    "build": "bun run prebuild:mesh && wrangler build",
+    "prebuild:mesh": "mesh build --output .mesh",
     "mesh:dev": "mesh dev",
-    "prebuild:mesh": " bun run mesh build --output .mesh",
-    "deploy": "wrangler deploy",
+    "deploy": "bun run build && wrangler deploy",
     "dev": "(kill -9 $(lsof -t -i:7500) || true) && wrangler dev --name graphql-mesh --port 7500 --inspector-port 7300",
     "start": "wrangler dev",
     "test": "vitest",
