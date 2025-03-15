@@ -51,7 +51,7 @@ flowchart TD
    Client([Client Applications]) --> MeshGateway
    Client --> StitchingGateway
 
-   subgraph "Gateway Layer"
+   subgraph "Gateway Layer (Cloudflare Workers)"
        MeshGateway[GraphQL Mesh Gateway]
        StitchingGateway[Schema-Stitching Gateway]
    end
