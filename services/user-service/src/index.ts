@@ -183,6 +183,7 @@ const createUserLoader = () => {
     {
       // This cache is per-request
       cache: true,
+      maxBatchSize: 20,
     },
   );
 };

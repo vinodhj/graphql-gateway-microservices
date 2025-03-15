@@ -214,6 +214,7 @@ const createExpenseLoader = () => {
     },
     {
       cache: true, // Per-request cache
+      maxBatchSize: 20,
     },
   );
 };
@@ -278,6 +279,7 @@ const createUserExpensesLoader = () => {
     },
     {
       cache: true, // Per-request cache
+      maxBatchSize: 20,
     },
   );
 };

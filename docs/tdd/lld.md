@@ -42,7 +42,8 @@ type User {
 
 type Query {
   user(id: ID!): User
-  users: [User]
+  users(ids: [ID!]!): [User]!
+  allUsers: [User]
 }
 
 type Mutation {
@@ -69,6 +70,7 @@ type Query {
   expense(id: ID!): Expense
   expenses: [Expense]
   expensesByUser(userId: ID!): [Expense]
+  expensesByUsers(userIds: [ID!]!): [Expense]! # New batch endpoint
   expensesByDate(startDate: String!, endDate: String): [Expense]
 }
 
@@ -140,7 +142,7 @@ type Mutation {
 
 | Gateway Type     | Operation Type      | Access Pattern                | Optimization             |
 | ---------------- | ------------------- | ----------------------------- | ------------------------ |
-| GraphQL Mesh     | Simple Query        | Direct delegation             | Schema caching           |
+| GraphQL Mesh     | Simple Query        | Direct delegation             | Schema                   |
 | GraphQL Mesh     | Cross-Service Query | Type merging with DataLoader  | Batched service calls    |
 | Schema-Stitching | Simple Query        | Direct delegation             | Schema caching           |
 | Schema-Stitching | Cross-Service Query | Info delegation with fragment | Explicit type resolution |
@@ -234,15 +236,7 @@ flowchart TD
 | ---------------- | ------------------------ | ------------------------ | ------- |
 | Mesh Gateway     | SERVICE_USER_ENDPOINT    | User service URL         | N/A     |
 | Mesh Gateway     | SERVICE_EXPENSE_ENDPOINT | Expense service URL      | N/A     |
-| Mesh Gateway     | CACHE_TTL                | Cache timeout in seconds | 300     |
+| Schema-Stitching | CACHE_TTL                | Cache timeout in seconds | 300     |
 | Schema-Stitching | SERVICE_TIMEOUT_MS       | Service call timeout     | 5000    |
 | User Service     | CACHE_ENABLED            | Toggle caching           | true    |
-| Expense Service  | BATCH_SIZE               | DataLoader batch size    | 100     |
-
-#### 1.7.2 Service Health Monitoring Points
-
-| Component       | Health Check Endpoint | Metrics                                       |
-| --------------- | --------------------- | --------------------------------------------- |
-| Gateway         | /health               | Request count, latency, error rate            |
-| User Service    | /health               | Request count, cache hit rate, DB access time |
-| Expense Service | /health               | Request count, cache hit rate, DB access time |
+| Expense Service  | BATCH_SIZE               | DataLoader batch size    | 20      |
