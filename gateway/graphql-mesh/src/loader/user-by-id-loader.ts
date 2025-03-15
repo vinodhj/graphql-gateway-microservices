@@ -50,7 +50,6 @@ export const createUsersLoader = (context: MeshContext, info: GraphQLResolveInfo
           info,
         });
         const users: UserResponse = rawUsers as UserResponse;
-        console.log("Users result structure:", JSON.stringify(users, null, 2));
         const userMap = groupUsersById(users);
         return userIds.map((userId) => userMap.get(userId) || null);
       } catch (error: unknown) {

@@ -60,7 +60,6 @@ export const createExpensesLoader = (context: MeshContext, info: GraphQLResolveI
           info,
         });
         const result: ExpenseResponse = rawResult as ExpenseResponse;
-        console.log("Expenses result structure:", JSON.stringify(result, null, 2));
         const expensesByUser = groupExpensesByUser(result);
         return userIds.map((userId) => expensesByUser.get(userId) || []);
       } catch (error: unknown) {
