@@ -153,13 +153,27 @@ type Mutation {
 flowchart TD
     A[Gateway Request] --> B{DataLoader Initialized?}
     B -- No --> C[Initialize DataLoader]
-    B -- Yes --> D{Cache Hit?}
+    B -- Yes --> D{Key in DataLoader Cache?}
     C --> D
     D -- Yes --> E[Return Cached Result]
-    D -- No --> F[Batch Load Entities]
-    F --> G[Cache Results]
-    G --> H[Return Results]
-    E --> H
+    D -- No --> F[Queue Key for Batch]
+    F --> G{Batch Ready?}
+    G -- No --> H[Wait for More Keys]
+    G -- Yes --> I[Batch Load Entities from DB]
+    H --> G
+    I --> J[Cache Results in DataLoader]
+    J --> K[Return Results to Requester]
+    E --> K
+
+    classDef start fill:#f9f9f9,stroke:#333,stroke-width:1px
+    classDef process fill:#bbf,stroke:#333,stroke-width:1px
+    classDef decision fill:#ffd,stroke:#333,stroke-width:1px
+    classDef endNode fill:#dfd,stroke:#333,stroke-width:1px
+
+    class A start
+    class B,D,G decision
+    class C,F,H,I,J process
+    class E,K endNode
 ```
 
 #### 1.5.2 Caching Implementation Strategy
@@ -178,14 +192,28 @@ flowchart TD
     A[Client Request] --> B[Parse GraphQL Query]
     B --> C[Plan Query Execution]
     C --> D{Requires Multiple Services?}
+
     D -- Yes --> E[Initialize Cross-Service DataLoaders]
     D -- No --> F[Forward to Appropriate Service]
+
     E --> G[Execute Optimized Sub-Queries]
     F --> H[Process Service Response]
+
     G --> I[Merge Results]
     I --> J[Transform Final Response]
     H --> J
+
     J --> K[Return to Client]
+
+    classDef start fill:#f9f9f9,stroke:#333,stroke-width:1px
+    classDef process fill:#bbf,stroke:#333,stroke-width:1px
+    classDef decision fill:#ffd,stroke:#333,stroke-width:1px
+    classDef endNode fill:#dfd,stroke:#333,stroke-width:1px
+
+    class A start
+    class D decision
+    class B,C,E,F,G,H,I,J process
+    class K endNode
 ```
 
 ### 1.6 Error Handling Strategy

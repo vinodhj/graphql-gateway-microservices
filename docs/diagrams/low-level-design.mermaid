@@ -5,7 +5,6 @@ flowchart TB
         GM_Routes[Route to Services]
         GM_BatchUser[Batch User Requests]
         GM_BatchExpense[Batch Expense Requests]
-        GM_Cache[Check/Update Cache]
         GM_Response[Combine & Respond]
     end
     
@@ -24,7 +23,7 @@ flowchart TB
         US_Resolver[Resolve Query]
         US_DL[DataLoader]
         US_Cache[In-memory Cache]
-        US_DB[Database Operation]
+        US_DB[(User Database)]
         US_Response[Service Response]
     end
     
@@ -33,7 +32,7 @@ flowchart TB
         ES_Resolver[Resolve Query]
         ES_DL[DataLoader]
         ES_Cache[In-memory Cache]
-        ES_DB[Database Operation]
+        ES_DB[(Expense Database)]
         ES_UserLookup[User Info Lookup]
         ES_Response[Service Response]
     end
@@ -43,9 +42,8 @@ flowchart TB
     GM_Parse --> GM_Routes
     GM_Routes --> GM_BatchUser
     GM_Routes --> GM_BatchExpense
-    GM_BatchUser --> GM_Cache
-    GM_BatchExpense --> GM_Cache
-    GM_Cache --> GM_Response
+    GM_BatchUser --> GM_Response
+    GM_BatchExpense --> GM_Response
     
     %% Schema-stitching flow
     GS_Request --> GS_Parse
@@ -63,6 +61,9 @@ flowchart TB
     US_Cache --> US_DB
     US_DB --> US_Response
     
+    %% Cache miss path
+    US_DL -.-> US_DB
+    
     %% Expense Service flow
     ES_Endpoint --> ES_Resolver
     ES_Resolver --> ES_DL
@@ -71,6 +72,9 @@ flowchart TB
     ES_Resolver --> ES_UserLookup
     ES_UserLookup -.-> US_Endpoint
     ES_DB --> ES_Response
+    
+    %% Cache miss path
+    ES_DL -.-> ES_DB
     
     %% Gateway to Service connections
     GM_BatchUser --> US_Endpoint
@@ -82,8 +86,10 @@ flowchart TB
     classDef process fill:#bbf,stroke:#333,stroke-width:1px
     classDef optimization fill:#ffd,stroke:#333,stroke-width:1px
     classDef response fill:#dfd,stroke:#333,stroke-width:1px
+    classDef database fill:#90ee90,stroke:#333,stroke-width:1px
     
     class GM_Request,GS_Request,US_Endpoint,ES_Endpoint request
     class GM_Parse,GM_Routes,GS_Parse,GS_SchemaCheck,GS_Delegate,US_Resolver,ES_Resolver,ES_UserLookup process
-    class GM_BatchUser,GM_BatchExpense,GM_Cache,GS_BatchUser,GS_BatchExpense,US_DL,US_Cache,ES_DL,ES_Cache optimization
+    class GM_BatchUser,GM_BatchExpense,GS_BatchUser,GS_BatchExpense,US_DL,US_Cache,ES_DL,ES_Cache optimization
     class GM_Response,GS_Response,US_Response,ES_Response response
+    class US_DB,ES_DB database

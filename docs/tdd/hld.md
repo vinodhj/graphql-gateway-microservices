@@ -14,6 +14,8 @@ The project implements two gateway approaches for comparison:
 
 ### 1.2 Architecture Diagram
 
+- Basic Architecture Diagram
+
 ```mermaid
 flowchart TD
     Client([Client Applications]) --> MeshGateway
@@ -40,6 +42,62 @@ flowchart TD
     class MeshGateway,StitchingGateway,UserService,ExpenseService service
     class UserDB,ExpenseDB db
     class Client client
+```
+
+- High-Level Design Architecture Diagram
+
+```mermaid
+flowchart TD
+   Client([Client Applications]) --> MeshGateway
+   Client --> StitchingGateway
+
+   subgraph "Gateway Layer"
+       MeshGateway[GraphQL Mesh Gateway]
+       StitchingGateway[Schema-Stitching Gateway]
+   end
+
+   MeshGateway --> UserService
+   MeshGateway --> ExpenseService
+   StitchingGateway --> UserService
+   StitchingGateway --> ExpenseService
+
+   subgraph "Microservices (Cloudflare Workers)"
+       subgraph "User Service"
+           UserService[GraphQL Yoga Server]
+           UserDL[DataLoader]
+           UserCache[In-memory Cache]
+       end
+
+       subgraph "Expense Service"
+           ExpenseService[GraphQL Yoga Server]
+           ExpenseDL[DataLoader]
+           ExpenseCache[In-memory Cache]
+       end
+   end
+
+   UserService --> UserDL
+   UserDL --> UserCache
+   UserCache --> UserDB[(User Database)]
+   UserDL -.-> UserDB
+
+   ExpenseService --> ExpenseDL
+   ExpenseDL --> ExpenseCache
+   ExpenseCache --> ExpenseDB[(Expense Database)]
+   ExpenseDL -.-> ExpenseDB
+
+   ExpenseService -.-> UserService
+
+   classDef gateway fill:#f9f,stroke:#333,stroke-width:2px
+   classDef service fill:#326ce5,stroke:#fff,stroke-width:1px,color:#fff
+   classDef optimization fill:#ffd700,stroke:#333,stroke-width:1px
+   classDef db fill:#90ee90,stroke:#333,stroke-width:1px
+   classDef client fill:#60a917,stroke:#333,stroke-width:1px,color:#fff
+
+   class MeshGateway,StitchingGateway gateway
+   class UserService,ExpenseService service
+   class UserDL,UserCache,ExpenseDL,ExpenseCache optimization
+   class UserDB,ExpenseDB db
+   class Client client
 ```
 
 ### 1.3 Key Components
@@ -78,33 +136,91 @@ flowchart TD
 ```mermaid
 sequenceDiagram
     participant Client
-    participant Gateway as GraphQL Gateways
-    participant UserMS as User Microservice
-    participant ExpenseMS as Expense Microservice
+    participant Mesh as GraphQL Mesh Gateway
+    participant Stitching as Schema-stitching Gateway
+    participant UserService
+    participant UserDB as User Database
+    participant ExpenseService
+    participant ExpenseDB as Expense Database
 
-    Client->>Gateway: GraphQL Query/Mutation
+    Client->>+Mesh: GraphQL Query
+    Mesh->>Mesh: Parse & Plan Query
 
-    alt Simple User Query
-        Gateway->>UserMS: Forward User Query
-        UserMS->>UserMS: Check DataLoader Cache
-        UserMS-->>Gateway: User Data
-        Gateway-->>Client: User Data Response
+    alt Query requires User data
+        Mesh->>+UserService: Batch User Requests
+        UserService->>UserService: Check DataLoader Cache
 
-    else Simple Expense Query
-        Gateway->>ExpenseMS: Forward Expense Query
-        ExpenseMS->>ExpenseMS: Check DataLoader Cache
-        ExpenseMS-->>Gateway: Expense Data
-        Gateway-->>Client: Expense Data Response
-
-    else Complex Query (User with Expenses)
-        Gateway->>UserMS: Batch User Requests
-        UserMS->>UserMS: Check DataLoader Cache
-        UserMS-->>Gateway: User Data
-        Gateway->>ExpenseMS: Batch Expense Requests
-        ExpenseMS->>ExpenseMS: Check DataLoader Cache
-        ExpenseMS-->>Gateway: Expense Data
-        Gateway-->>Client: Combined Response
+        alt Cache Hit
+            UserService-->>Mesh: Return Cached Data
+        else Cache Miss
+            UserService->>+UserDB: Fetch from DB
+            UserDB-->>-UserService: Return DB Data
+            UserService->>UserService: Update Cache
+            UserService-->>Mesh: Return Fresh Data
+        end
     end
+
+    alt Query requires Expense data
+        Mesh->>+ExpenseService: Batch Expense Requests
+        ExpenseService->>ExpenseService: Check DataLoader Cache
+
+        alt Cache Hit
+            ExpenseService-->>Mesh: Return Cached Data
+        else Cache Miss
+            ExpenseService->>+ExpenseDB: Fetch from DB
+            ExpenseDB-->>-ExpenseService: Return DB Data
+
+            alt Expenses need User data
+                ExpenseService->>+UserService: Batch User Lookup
+                UserService->>UserService: Check DataLoader Cache
+
+                alt User Cache Hit
+                    UserService-->>ExpenseService: Return Cached User Data
+                else User Cache Miss
+                    UserService->>+UserDB: Fetch from DB
+                    UserDB-->>-UserService: Return DB Data
+                    UserService->>UserService: Update Cache
+                    UserService-->>ExpenseService: Return Fresh User Data
+                end
+
+                ExpenseService->>ExpenseService: Cache Results
+            end
+
+            ExpenseService-->>Mesh: Return Fresh Data
+        end
+    end
+
+    Mesh-->>-Client: Combined Response
+
+    Note over Client,ExpenseDB: Similar flow for Schema-stitching Gateway with some differences
+
+    Client->>+Stitching: GraphQL Query
+    Stitching->>Stitching: Check Schema Cache TTL
+    Stitching->>Stitching: Plan & Delegate to Services
+
+    alt Query requires User data
+        Stitching->>+UserService: Batch User Requests (with timeout)
+
+        alt Request within timeout
+            UserService->>UserService: Process Request (same flow as above)
+            UserService-->>Stitching: Return Data
+        else Timeout exceeded
+            UserService-->>Stitching: Timeout Error
+        end
+    end
+
+    alt Query requires Expense data
+        Stitching->>+ExpenseService: Batch Expense Requests (with timeout)
+
+        alt Request within timeout
+            ExpenseService->>ExpenseService: Process Request (same flow as above)
+            ExpenseService-->>Stitching: Return Data
+        else Timeout exceeded
+            ExpenseService-->>Stitching: Timeout Error
+        end
+    end
+
+    Stitching-->>-Client: Combined Response
 ```
 
 ### 1.5 Cross-Cutting Concerns

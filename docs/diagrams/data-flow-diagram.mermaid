@@ -3,7 +3,9 @@ sequenceDiagram
     participant Mesh as GraphQL Mesh Gateway
     participant Stitching as Schema-stitching Gateway
     participant UserService
+    participant UserDB as User Database
     participant ExpenseService
+    participant ExpenseDB as Expense Database
     
     Client->>+Mesh: GraphQL Query
     Mesh->>Mesh: Parse & Plan Query
@@ -15,7 +17,9 @@ sequenceDiagram
         alt Cache Hit
             UserService-->>Mesh: Return Cached Data
         else Cache Miss
-            UserService->>UserService: Fetch from DB & Cache
+            UserService->>+UserDB: Fetch from DB
+            UserDB-->>-UserService: Return DB Data
+            UserService->>UserService: Update Cache
             UserService-->>Mesh: Return Fresh Data
         end
     end
@@ -27,12 +31,22 @@ sequenceDiagram
         alt Cache Hit
             ExpenseService-->>Mesh: Return Cached Data
         else Cache Miss
-            ExpenseService->>ExpenseService: Fetch from DB
+            ExpenseService->>+ExpenseDB: Fetch from DB
+            ExpenseDB-->>-ExpenseService: Return DB Data
             
             alt Expenses need User data
                 ExpenseService->>+UserService: Batch User Lookup
                 UserService->>UserService: Check DataLoader Cache
-                UserService-->>ExpenseService: Return User Data
+                
+                alt User Cache Hit
+                    UserService-->>ExpenseService: Return Cached User Data
+                else User Cache Miss
+                    UserService->>+UserDB: Fetch from DB
+                    UserDB-->>-UserService: Return DB Data
+                    UserService->>UserService: Update Cache
+                    UserService-->>ExpenseService: Return Fresh User Data
+                end
+                
                 ExpenseService->>ExpenseService: Cache Results
             end
             
@@ -40,9 +54,9 @@ sequenceDiagram
         end
     end
     
-    Mesh-->>Client: Combined Response
+    Mesh-->>-Client: Combined Response
     
-    Note over Client,Mesh: Similar flow for Schema-stitching Gateway
+    Note over Client,ExpenseDB: Similar flow for Schema-stitching Gateway with some differences
     
     Client->>+Stitching: GraphQL Query
     Stitching->>Stitching: Check Schema Cache TTL
@@ -50,12 +64,24 @@ sequenceDiagram
     
     alt Query requires User data
         Stitching->>+UserService: Batch User Requests (with timeout)
-        UserService-->>Stitching: Return Data
+        
+        alt Request within timeout
+            UserService->>UserService: Process Request (same flow as above)
+            UserService-->>Stitching: Return Data
+        else Timeout exceeded
+            UserService-->>Stitching: Timeout Error
+        end
     end
     
     alt Query requires Expense data
         Stitching->>+ExpenseService: Batch Expense Requests (with timeout)
-        ExpenseService-->>Stitching: Return Data
+        
+        alt Request within timeout
+            ExpenseService->>ExpenseService: Process Request (same flow as above)
+            ExpenseService-->>Stitching: Return Data
+        else Timeout exceeded
+            ExpenseService-->>Stitching: Timeout Error
+        end
     end
     
-    Stitching-->>Client: Combined Response
+    Stitching-->>-Client: Combined Response

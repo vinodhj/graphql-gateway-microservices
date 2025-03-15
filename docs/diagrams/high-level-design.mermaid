@@ -5,7 +5,6 @@ flowchart TD
     
     subgraph "Gateway Comparison"
         subgraph "GraphQL Mesh Gateway"
-            GM_Cache[In-memory Cache]
             GM_DL[DataLoader]
             GM_Schema[".mesh Generated Schema"]
             GM_Resolvers["Additional Resolvers.ts"]
@@ -19,17 +18,19 @@ flowchart TD
         end
     end
     
-    subgraph "Microservices (Cloudflare Workers)"
-        subgraph "User Service"
-            US_Cache[In-memory Cache]
-            US_DL[DataLoader]
+    subgraph "Microservices (CF Workers)"
+        subgraph "User Service" 
             US_API[GraphQL Yoga Server]
+            US_DL[DataLoader]
+            US_Cache[In-memory Cache]
+            US_DB[(User Database)]
         end
         
         subgraph "Expense Service"
-            ES_Cache[In-memory Cache]
-            ES_DL[DataLoader]
             ES_API[GraphQL Yoga Server]
+            ES_DL[DataLoader]
+            ES_Cache[In-memory Cache]
+            ES_DB[(Expense Database)]
         end
     end
     
@@ -38,30 +39,40 @@ flowchart TD
     
     GM_Schema --> GM_Resolvers
     GM_Resolvers --> GM_DL
-    GM_DL --> GM_Cache
     
     GS_Schema --> GS_DL
     GS_DL --> GS_Cache
     GS_Schema --> GS_Timeout
     
-    GM_Cache --> US_API
-    GM_Cache --> ES_API
+    GM_DL --> US_API
+    GM_DL --> ES_API
+
+    GM_Schema --> US_API
+    GM_Schema --> ES_API
     
     GS_Cache --> US_API
     GS_Cache --> ES_API
     
     US_API --> US_DL
     US_DL --> US_Cache
+    US_Cache --> US_DB
     
     ES_API --> ES_DL
     ES_DL --> ES_Cache
+    ES_Cache --> ES_DB
+    
+    %% Add data flow when cache misses
+    US_DL -.-> US_DB
+    ES_DL -.-> ES_DB
     
     classDef client fill:#f9f9f9,stroke:#333,stroke-width:1px
     classDef gateway fill:#f9f,stroke:#333,stroke-width:2px
     classDef service fill:#bbf,stroke:#333,stroke-width:1px
     classDef optimization fill:#ffd,stroke:#333,stroke-width:1px
+    classDef database fill:#90ee90,stroke:#333,stroke-width:1px
     
     class Client client
     class GM_Schema,GM_Resolvers,GS_Schema,GS_Timeout gateway
     class US_API,ES_API service
-    class GM_Cache,GM_DL,GS_Cache,GS_DL,US_Cache,US_DL,ES_Cache,ES_DL optimization
+    class GM_DL,GS_Cache,GS_DL,US_Cache,US_DL,ES_Cache,ES_DL optimization
+    class US_DB,ES_DB database

@@ -1,6 +1,6 @@
 graph TD
-    subgraph "Client Applications"
-        Client[Client Application]
+    subgraph "Client Layer"
+        Client[Client Applications]
     end
     
     subgraph "Gateway Layer"
@@ -34,6 +34,7 @@ graph TD
     
     %% Cross-service data requirements
     ExpenseService -.->|User Data Lookup| UserService
+    UserService -.->|Expense Data Lookup| ExpenseService
     
     %% Labels
     classDef gateway fill:#f9f,stroke:#333,stroke-width:2px
