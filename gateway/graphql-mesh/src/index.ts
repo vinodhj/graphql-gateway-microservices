@@ -11,8 +11,24 @@ export interface Env {
 
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+    // Handle CORS preflight
+    if (request.method === "OPTIONS") {
+      return new Response(null, {
+        status: 204,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+          "Access-Control-Allow-Headers": "Content-Type, Authorization",
+          "Access-Control-Max-Age": "86400",
+        },
+      });
+    }
     try {
       const isDevelopment = env.WORKER_ENV === "dev";
+      console.log(`Running in ${isDevelopment ? "development" : "production"} mode`);
+      console.log(`User service URL: ${env.USER_SERVICE_URL}`);
+      console.log(`Expense service URL: ${env.EXPENSE_SERVICE_URL}`);
+
       const customGetBuiltMesh = async () => {
         // Import the mesh options but NOT the existing getBuiltMesh
         const { getMeshOptions } = await import("../.mesh");
@@ -63,7 +79,13 @@ export default {
       const meshHandler = createMeshHTTPHandler({
         baseDir: ".",
         getBuiltMesh: customGetBuiltMesh,
-        rawServeConfig: undefined,
+        rawServeConfig: {
+          cors: {
+            origin: "*",
+            credentials: true,
+          },
+          playground: true,
+        },
       });
 
       // Use the timing handler in development, raw handler in production
@@ -87,7 +109,10 @@ export default {
         }),
         {
           status: 500,
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+          },
         },
       );
     }

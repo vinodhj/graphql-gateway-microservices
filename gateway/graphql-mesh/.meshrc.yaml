@@ -1,12 +1,21 @@
+# .meshrc.yml
 sources:
   - name: UserService
     handler:
       graphql:
-        endpoint: "http://localhost:7501/graphql"
+        endpoint: "https://user-service.vinodh-jeevanantham.workers.dev/graphql"
+        method: POST
+        operationHeaders:
+          Content-Type: "application/json"
+          Accept: "application/json"
   - name: ExpenseService
     handler:
       graphql:
-        endpoint: "http://localhost:7502/graphql"
+        endpoint: "https://expense-service.vinodh-jeevanantham.workers.dev/graphql"
+        method: POST
+        operationHeaders:
+          Content-Type: "application/json"
+          Accept: "application/json"
 
 additionalTypeDefs: |
   extend type User {
@@ -15,5 +24,12 @@ additionalTypeDefs: |
   extend type Expense {
     user: User!
   }
+
 additionalResolvers:
   - "./src/additional-resolvers.ts"
+
+serve:
+  cors:
+    origin: "*"
+    credentials: true
+  playground: true
