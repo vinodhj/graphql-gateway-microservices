@@ -36,7 +36,7 @@ flowchart TD
     ExpenseService --- ExpenseDB[(Expense Data)]
 
     classDef service fill:#326ce5,stroke:#fff,stroke-width:1px,color:#fff
-    classDef db fill:#f9f,stroke:#333,stroke-width:1px
+    classDef db fill:#f9f,stroke:#333,stroke-width:1px,color:#fff
     classDef client fill:#60a917,stroke:#333,stroke-width:1px,color:#fff
 
     class MeshGateway,StitchingGateway,UserService,ExpenseService service
@@ -87,10 +87,10 @@ flowchart TD
 
    ExpenseService -.-> UserService
 
-   classDef gateway fill:#f9f,stroke:#333,stroke-width:2px
+   classDef gateway fill:#f9f,stroke:#333,stroke-width:2px,color:#fff
    classDef service fill:#326ce5,stroke:#fff,stroke-width:1px,color:#fff
-   classDef optimization fill:#ffd700,stroke:#333,stroke-width:1px
-   classDef db fill:#90ee90,stroke:#333,stroke-width:1px
+   classDef optimization fill:#818b98,stroke:#333,stroke-width:1px,color:#fff
+   classDef db fill:#45a386,stroke:#333,stroke-width:1px,color:#fff
    classDef client fill:#60a917,stroke:#333,stroke-width:1px,color:#fff
 
    class MeshGateway,StitchingGateway gateway
