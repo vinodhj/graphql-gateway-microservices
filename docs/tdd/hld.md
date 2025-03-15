@@ -48,56 +48,60 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-   Client([Client Applications]) --> MeshGateway
-   Client --> StitchingGateway
+    Client([Client Applications]) --> MeshGateway
+    Client --> StitchingGateway
 
-   subgraph GatewayLayer["Gateway Layer (Cloudflare Workers)"]
-       MeshGateway[GraphQL Mesh Gateway]
-       StitchingGateway[Schema-Stitching Gateway]
-   end
+    subgraph CloudflareWorkers["Cloudflare Workers Platform"]
+        subgraph Gateway["Gateway Layer"]
+            MeshGateway["GraphQL Mesh Gateway"]
+            StitchingGateway["Schema-Stitching Gateway"]
+        end
 
-   MeshGateway --> UserService
-   MeshGateway --> ExpenseService
-   StitchingGateway --> UserService
-   StitchingGateway --> ExpenseService
+        subgraph Microservices["Microservices"]
+            subgraph UserSvc["User Service"]
+                UserService["GraphQL Yoga Server"]
+                UserDL["DataLoader"]
+                UserCache["In-memory Cache"]
+            end
 
-   subgraph MicroservicesLayer["Microservices (Cloudflare Workers)"]
-       subgraph UserServiceBlock["User Service"]
-           UserService[GraphQL Yoga Server]
-           UserDL[DataLoader]
-           UserCache[In-memory Cache]
-       end
+            subgraph ExpenseSvc["Expense Service"]
+                ExpenseService["GraphQL Yoga Server"]
+                ExpenseDL["DataLoader"]
+                ExpenseCache["In-memory Cache"]
+            end
+        end
+    end
 
-       subgraph ExpenseServiceBlock["Expense Service"]
-           ExpenseService[GraphQL Yoga Server]
-           ExpenseDL[DataLoader]
-           ExpenseCache[In-memory Cache]
-       end
-   end
+    MeshGateway --> UserService
+    MeshGateway --> ExpenseService
+    StitchingGateway --> UserService
+    StitchingGateway --> ExpenseService
 
-   UserService --> UserDL
-   UserDL --> UserCache
-   UserCache --> UserDB[(User Database)]
-   UserDL -.-> UserDB
+    UserService --> UserDL
+    UserDL --> UserCache
+    UserCache --> UserDB[(User Database)]
+    UserDL -.-> UserDB
 
-   ExpenseService --> ExpenseDL
-   ExpenseDL --> ExpenseCache
-   ExpenseCache --> ExpenseDB[(Expense Database)]
-   ExpenseDL -.-> ExpenseDB
+    ExpenseService --> ExpenseDL
+    ExpenseDL --> ExpenseCache
+    ExpenseCache --> ExpenseDB[(Expense Database)]
+    ExpenseDL -.-> ExpenseDB
 
-   ExpenseService -.-> UserService
+    ExpenseService -.-> UserService
 
-   classDef gateway fill:#f9f,stroke:#333,stroke-width:2px,color:#fff
-   classDef service fill:#326ce5,stroke:#fff,stroke-width:1px,color:#fff
-   classDef optimization fill:#818b98,stroke:#333,stroke-width:1px,color:#fff
-   classDef db fill:#45a386,stroke:#333,stroke-width:1px,color:#fff
-   classDef client fill:#60a917,stroke:#333,stroke-width:1px,color:#fff
+    classDef gateway fill:#f9f,stroke:#333,stroke-width:2px,color:#fff
+    classDef service fill:#326ce5,stroke:#fff,stroke-width:1px,color:#fff
+    classDef optimization fill:#818b98,stroke:#333,stroke-width:1px,color:#fff
+    classDef db fill:#45a386,stroke:#333,stroke-width:1px,color:#fff
+    classDef client fill:#60a917,stroke:#333,stroke-width:1px,color:#fff
+    classDef platform fill:#0a7ebf,stroke:#333,stroke-width:1px,color:#fff
 
-   class MeshGateway,StitchingGateway gateway
-   class UserService,ExpenseService service
-   class UserDL,UserCache,ExpenseDL,ExpenseCache optimization
-   class UserDB,ExpenseDB db
-   class Client client
+    class MeshGateway,StitchingGateway gateway
+    class UserService,ExpenseService service
+    class UserDL,UserCache,ExpenseDL,ExpenseCache optimization
+    class UserDB,ExpenseDB db
+    class Client client
+    class CloudflareWorkers platform
 ```
 
 ### 1.3 Key Components
