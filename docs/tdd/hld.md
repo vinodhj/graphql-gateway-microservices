@@ -94,7 +94,7 @@ flowchart TD
     classDef optimization fill:#818b98,stroke:#333,stroke-width:1px,color:#fff
     classDef db fill:#45a386,stroke:#333,stroke-width:1px,color:#fff
     classDef client fill:#60a917,stroke:#333,stroke-width:1px,color:#fff
-    classDef platform fill:#0a7ebf,stroke:#333,stroke-width:1px,color:#fff
+    classDef platform fill:#605e5c,stroke:#333,stroke-width:1px,color:#fff
 
     class MeshGateway,StitchingGateway gateway
     class UserService,ExpenseService service
