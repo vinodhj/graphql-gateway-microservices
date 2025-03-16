@@ -7,10 +7,11 @@ The system implements a GraphQL gateway that connects two microservices built wi
 1. **User Microservice**: Manages user information and accounts with optimized data fetching
 2. **Expense Tracker Microservice**: Tracks daily expenses linked to specific users with optimized data fetching
 
-The project implements two gateway approaches for comparison:
+The project implements three gateway approaches for comparison:
 
 1. **GraphQL Mesh Gateway**: Automatically generates a unified schema
 2. **Schema-Stitching Gateway**: Manually connects schemas using graphql-tools
+3. **Hive Gateway**: Provides a fully managed GraphQL gateway solution with advanced features
 
 ### 1.2 Architecture Diagram
 
@@ -20,27 +21,32 @@ The project implements two gateway approaches for comparison:
 flowchart TD
     Client([Client Applications]) --> MeshGateway
     Client --> StitchingGateway
+    Client --> HiveGateway
     MeshGateway[GraphQL Mesh Gateway] --> UserService[User Microservice]
     MeshGateway --> ExpenseService[Expense Tracker Microservice]
     StitchingGateway[Schema-Stitching Gateway] --> UserService
     StitchingGateway --> ExpenseService
+    HiveGateway[Hive Gateway] --> UserService
+    HiveGateway --> ExpenseService
 
     subgraph "Cloudflare Workers"
     MeshGateway
     StitchingGateway
+    HiveGateway
     UserService
     ExpenseService
     end
 
     UserService --- UserDB[(User Data)]
     ExpenseService --- ExpenseDB[(Expense Data)]
+    HiveGateway --- SchemaRegistry[(Schema Registry)]
 
     classDef service fill:#326ce5,stroke:#fff,stroke-width:1px,color:#fff
     classDef db fill:#45a386,stroke:#333,stroke-width:1px,color:#fff
     classDef client fill:#60a917,stroke:#333,stroke-width:1px,color:#fff
 
-    class MeshGateway,StitchingGateway,UserService,ExpenseService service
-    class UserDB,ExpenseDB db
+    class MeshGateway,StitchingGateway,HiveGateway,UserService,ExpenseService service
+    class UserDB,ExpenseDB,SchemaRegistry db
     class Client client
 ```
 
@@ -50,11 +56,13 @@ flowchart TD
 flowchart TD
     Client([Client Applications]) --> MeshGateway
     Client --> StitchingGateway
+    Client --> HiveGateway
 
     subgraph CloudflareWorkers["Cloudflare Workers Platform"]
         subgraph Gateway["Gateway Layer"]
             MeshGateway["GraphQL Mesh Gateway"]
             StitchingGateway["Schema-Stitching Gateway"]
+            HiveGateway["Hive Gateway"]
         end
 
         subgraph Microservices["Microservices"]
@@ -76,6 +84,11 @@ flowchart TD
     MeshGateway --> ExpenseService
     StitchingGateway --> UserService
     StitchingGateway --> ExpenseService
+    HiveGateway --> UserService
+    HiveGateway --> ExpenseService
+
+    HiveGateway --- SchemaRegistry[(Schema Registry)]
+    HiveGateway --- Analytics[(Analytics & Monitoring)]
 
     UserService --> UserDL
     UserDL --> UserCache
@@ -96,10 +109,10 @@ flowchart TD
     classDef client fill:#60a917,stroke:#333,stroke-width:1px,color:#fff
     classDef platform fill:#605e5c,stroke:#333,stroke-width:1px,color:#fff
 
-    class MeshGateway,StitchingGateway gateway
+    class MeshGateway,StitchingGateway,HiveGateway gateway
     class UserService,ExpenseService service
     class UserDL,UserCache,ExpenseDL,ExpenseCache optimization
-    class UserDB,ExpenseDB db
+    class UserDB,ExpenseDB,SchemaRegistry,Analytics db
     class Client client
     class CloudflareWorkers platform
 ```
@@ -121,14 +134,25 @@ flowchart TD
 - **Responsibility**: Manual schema stitching, federation setup
 - **Optimization**: Configures schema cache TTL and service executor timeouts
 
-#### 1.3.3 User Microservice
+#### 1.3.3 Hive Gateway
+
+- **Purpose**: Provides a fully managed, feature-rich GraphQL gateway solution
+- **Technology**: Hive Gateway, Cloudflare Workers
+- **Responsibility**: Schema registry integration, schema validation, query planning, monitoring
+- **Key Features**:
+  - Centralized schema management via Schema Registry
+  - Intelligent request routing and caching strategies
+  - Real-time analytics and performance monitoring
+  - Automatic schema updates and versioning
+
+#### 1.3.4 User Microservice
 
 - **Purpose**: Manages user data and operations
 - **Technology**: GraphQL Yoga, Cloudflare Workers
 - **Responsibility**: CRUD operations for user entities
 - **Optimization**: Implements in-memory caching and DataLoader
 
-#### 1.3.4 Expense Tracker Microservice
+#### 1.3.5 Expense Tracker Microservice
 
 - **Purpose**: Manages expense records linked to users
 - **Technology**: GraphQL Yoga, Cloudflare Workers
@@ -142,6 +166,8 @@ sequenceDiagram
     participant Client
     participant Mesh as GraphQL Mesh Gateway
     participant Stitching as Schema-stitching Gateway
+    participant Hive as Hive Gateway
+    participant Registry as Schema Registry
     participant UserService
     participant UserDB as User Database
     participant ExpenseService
@@ -225,11 +251,35 @@ sequenceDiagram
     end
 
     Stitching-->>-Client: Combined Response
+
+    Note over Client,ExpenseDB: Hive Gateway with enhanced capabilities
+
+    Client->>+Hive: GraphQL Query
+    Hive->>+Registry: Validate Schema
+    Registry-->>-Hive: Schema Validation Result
+    Hive->>Hive: Optimize Query Plan
+    Hive->>Hive: Apply Caching Strategies
+
+    alt Query requires User data
+        Hive->>+UserService: Optimized User Requests
+        UserService->>UserService: Process User Request
+        UserService-->>-Hive: Return User Data
+    end
+
+    alt Query requires Expense data
+        Hive->>+ExpenseService: Optimized Expense Requests
+        ExpenseService->>ExpenseService: Process Expense Request
+        ExpenseService-->>-Hive: Return Expense Data
+    end
+
+    Hive->>Hive: Record Analytics
+    Hive-->>-Client: Optimized Combined Response
 ```
 
 ### 1.5 Cross-Cutting Concerns
 
 - **Caching**: Implemented at multiple levels (gateway, service, DataLoader)
 - **Batching**: Achieved through DataLoader implementation
-- **Monitoring**: Worker analytics and custom metrics
+- **Monitoring**: Worker analytics, custom metrics, and Hive Gateway analytics
 - **Performance Optimization**: Designed to minimize redundant lookups
+- **Schema Management**: Centralized via Hive Schema Registry for the Hive Gateway implementation

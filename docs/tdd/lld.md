@@ -98,6 +98,15 @@ type Mutation {
 - **Resolver Strategy**: Uses delegation pattern to route queries to appropriate services
 - **Performance Settings**: Configures schema caching TTL for reuse across requests
 
+#### 1.2.3 Hive Gateway Structure
+
+- **Schema Registry Integration**: Centralizes schema management and versioning
+- **Query Planning**: Implements intelligent query planning and optimization
+- **Request Routing**: Advanced routing strategies based on schema capabilities
+- **Monitoring**: Real-time analytics and performance tracking
+- **Caching Strategy**: Multi-level caching with intelligent invalidation
+- **Automatic Updates**: Self-healing schema composition and updates
+
 ### 1.3 Microservice Structure
 
 #### 1.3.1 User Microservice Architecture
@@ -140,12 +149,15 @@ type Mutation {
 
 #### 1.4.3 Gateway Access Patterns
 
-| Gateway Type     | Operation Type      | Access Pattern                | Optimization             |
-| ---------------- | ------------------- | ----------------------------- | ------------------------ |
-| GraphQL Mesh     | Simple Query        | Direct delegation             | Schema                   |
-| GraphQL Mesh     | Cross-Service Query | Type merging with DataLoader  | Batched service calls    |
-| Schema-Stitching | Simple Query        | Direct delegation             | Schema caching           |
-| Schema-Stitching | Cross-Service Query | Info delegation with fragment | Explicit type resolution |
+| Gateway Type     | Operation Type      | Access Pattern                   | Optimization                    |
+| ---------------- | ------------------- | -------------------------------- | ------------------------------- |
+| GraphQL Mesh     | Simple Query        | Direct delegation                | Schema                          |
+| GraphQL Mesh     | Cross-Service Query | Type merging with DataLoader     | Batched service calls           |
+| Schema-Stitching | Simple Query        | Direct delegation                | Schema caching                  |
+| Schema-Stitching | Cross-Service Query | Info delegation with fragment    | Explicit type resolution        |
+| Hive Gateway     | Simple Query        | Direct delegation with analytics | Schema Registry validation      |
+| Hive Gateway     | Cross-Service Query | Query planning and optimization  | Intelligent request splitting   |
+| Hive Gateway     | Schema Updates      | Automatic schema composition     | Version-aware schema resolution |
 
 ### 1.5 Optimization Strategies
 
@@ -186,6 +198,7 @@ flowchart TD
 | Service    | In-Memory    | Request       | Duration of request | N/A (request-scoped)   |
 | DataLoader | In-Memory    | Request       | Duration of request | N/A (request-scoped)   |
 | Results    | In-Memory    | Cross-Request | Configurable        | On mutation operations |
+| Hive       | Multi-level  | Tiered        | Adaptive            | Smart invalidation     |
 
 #### 1.5.3 Request Processing Flow
 
@@ -218,6 +231,38 @@ flowchart TD
     class K endNode
 ```
 
+#### 1.5.4 Hive Gateway Optimization Flow
+
+```mermaid
+flowchart TD
+    A[Client Request] --> B[Schema Registry Validation]
+    B --> C[Query Analysis & Planning]
+    C --> D{Query Complexity Check}
+
+    D -- Simple --> E[Direct Service Delegation]
+    D -- Complex --> F[Query Splitting & Optimization]
+
+    F --> G[Parallel Execution]
+    E --> H[Performance Analytics]
+    G --> I[Result Composition]
+    I --> H
+
+    H --> J[Cache Decision]
+    J -- Cache --> K[Update Cache]
+    J -- No Cache --> L[Return Response]
+    K --> L
+
+    classDef start fill:#f9f9f9,stroke:#333,stroke-width:1px,color:#333
+    classDef process fill:#bbf,stroke:#333,stroke-width:1px,color:#333
+    classDef decision fill:#ffd,stroke:#333,stroke-width:1px,color:#333
+    classDef endNode fill:#dfd,stroke:#333,stroke-width:1px,color:#333
+
+    class A start
+    class D,J decision
+    class B,C,E,F,G,H,I,K process
+    class L endNode
+```
+
 ### 1.6 Error Handling Strategy
 
 | Error Type           | Handling Approach     | Responsibility |
@@ -227,16 +272,19 @@ flowchart TD
 | Business Logic Error | Domain-Specific Error | Microservice   |
 | Timeout              | Graceful Degradation  | Gateway        |
 | Data Consistency     | Compensating Action   | Microservice   |
+| Schema Conflicts     | Version Resolution    | Hive Gateway   |
+| Performance Issues   | Adaptive Throttling   | Hive Gateway   |
 
 ### 1.7 Deployment Configuration
 
 #### 1.7.1 Environment Variables
 
-| Component        | Variable                 | Purpose                  | Default |
-| ---------------- | ------------------------ | ------------------------ | ------- |
-| Mesh Gateway     | SERVICE_USER_ENDPOINT    | User service URL         | N/A     |
-| Mesh Gateway     | SERVICE_EXPENSE_ENDPOINT | Expense service URL      | N/A     |
-| Schema-Stitching | CACHE_TTL                | Cache timeout in seconds | 300     |
-| Schema-Stitching | SERVICE_TIMEOUT_MS       | Service call timeout     | 5000    |
-| User Service     | CACHE_ENABLED            | Toggle caching           | true    |
-| Expense Service  | BATCH_SIZE               | DataLoader batch size    | 20      |
+| Component        | Variable                 | Purpose                  | Default  |
+| ---------------- | ------------------------ | ------------------------ | -------- |
+| Mesh Gateway     | SERVICE_USER_ENDPOINT    | User service URL         | N/A      |
+| Mesh Gateway     | SERVICE_EXPENSE_ENDPOINT | Expense service URL      | N/A      |
+| Schema-Stitching | CACHE_TTL                | Cache timeout in seconds | 300      |
+| Schema-Stitching | SERVICE_TIMEOUT_MS       | Service call timeout     | 5000     |
+| Hive Gateway     | CACHE_STRATEGY           | Caching strategy         | adaptive |
+| User Service     | CACHE_ENABLED            | Toggle caching           | true     |
+| Expense Service  | BATCH_SIZE               | DataLoader batch size    | 20       |

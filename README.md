@@ -1,6 +1,6 @@
 # GraphQL Gateway Microservices
 
-This project demonstrates a proof-of-concept (PoC) for optimizing GraphQL gateway performance by minimizing redundant lookups. It compares two gateway approaches—**GraphQL Mesh** and **schema-stitching using graphql-tools** to connect two microservices built with Cloudflare Workers.
+This project demonstrates a proof-of-concept (PoC) for optimizing GraphQL gateway performance by minimizing redundant lookups. It compares three gateway approaches: **GraphQL Mesh**, **schema-stitching using graphql-tools**, and **Hive Gateway** to connect two microservices built with Cloudflare Workers.
 
 ## Project Architecture
 
@@ -15,7 +15,7 @@ This system implements a GraphQL gateway that connects two microservices built w
 
 ## Gateway Implementations
 
-Two gateway approaches are implemented for comparison:
+Three gateway approaches are implemented for comparison:
 
 ### GraphQL Mesh Gateway
 
@@ -37,6 +37,23 @@ Two gateway approaches are implemented for comparison:
 - **Optimization**:  
   Integrates DataLoader for batching and deduplication
 
+### Hive Gateway
+
+- **Implementation**:  
+  Uses [Hive Gateway](https://the-guild.dev/graphql/hive) to provide a fully managed GraphQL gateway solution.
+
+- **Key Features**:
+
+  - Schema Registry integration for centralized schema management
+  - Built-in schema validation and composition
+  - Performance analytics and monitoring capabilities
+  - Automatic schema updates and versioning
+
+- **Optimization**:
+  - Intelligent request routing and caching strategies
+  - Query planning and execution optimization
+  - Real-time analytics for performance tuning
+
 ## Tech Stack
 
 - **Runtime**: Bun
@@ -57,7 +74,8 @@ project-root/
 │   └── expense-service/
 ├── gateway/
 │   ├── graphql-mesh/
-│   └── graphql-tools/
+│   ├── graphql-tools/
+│   └── hive-gateway/
 └── package.json
 ```
 
