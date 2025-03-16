@@ -1,44 +1,54 @@
-import { Resolvers, MeshContext, User, Expense } from "../.mesh";
-import DataLoader from "dataloader";
 import { GraphQLResolveInfo } from "graphql";
 import { createUsersLoader } from "./loader/user-by-id-loader";
 import { createExpensesLoader } from "./loader/expenses-by-user-id-loader";
+import DataLoader from "dataloader";
+import { User, Expense } from "../generates";
 
-interface ExtendedContext extends MeshContext {
+// Define the context for Hive Gateway
+export interface HiveGatewayContext {
+  subgraphs: {
+    USER_SERVICE: any;
+    EXPENSE_SERVICE: any;
+  };
   expensesLoader?: DataLoader<string, Expense[]>;
   usersLoader?: DataLoader<string, User | null>;
 }
 
-export const resolvers: Resolvers = {
+function adaptContext(hiveContext: HiveGatewayContext): any {
+  return {
+    ["UserService"]: {
+      query: {
+        // Map old methods to new subgraph methods
+        users: (args: any) => hiveContext.subgraphs.USER_SERVICE.users(args),
+      },
+    },
+    ["ExpenseService"]: {
+      query: {
+        // Map old methods to new subgraph methods
+        expensesByUsers: (args: any) => hiveContext.subgraphs.EXPENSE_SERVICE.expensesByUsers(args),
+      },
+    },
+  };
+}
+
+export default {
   User: {
     expenses: {
-      selectionSet: /* GraphQL */ `
-        {
-          id
+      resolve: async (root: User, _args: {}, context: HiveGatewayContext, info: GraphQLResolveInfo): Promise<Expense[]> => {
+        if (!context.expensesLoader) {
+          context.expensesLoader = createExpensesLoader(adaptContext(context), info);
         }
-      `,
-      resolve: async (root: User, _args: {}, context: MeshContext, info: GraphQLResolveInfo): Promise<Expense[]> => {
-        const ctx = context as ExtendedContext;
-        if (!ctx.expensesLoader) {
-          ctx.expensesLoader = createExpensesLoader(context, info);
-        }
-        return ctx.expensesLoader.load(root.id);
+        return context.expensesLoader.load(root.id);
       },
     },
   },
   Expense: {
     user: {
-      selectionSet: /* GraphQL */ `
-        {
-          userId
+      resolve: async (root: Expense, _args: {}, context: HiveGatewayContext, info: GraphQLResolveInfo): Promise<User> => {
+        if (!context.usersLoader) {
+          context.usersLoader = createUsersLoader(adaptContext(context), info);
         }
-      `,
-      resolve: async (root: Expense, _args: {}, context: MeshContext, info: GraphQLResolveInfo): Promise<User> => {
-        const ctx = context as ExtendedContext;
-        if (!ctx.usersLoader) {
-          ctx.usersLoader = createUsersLoader(context, info);
-        }
-        const user = await ctx.usersLoader.load(root.userId);
+        const user = await context.usersLoader.load(root.userId);
         if (!user) {
           throw new Error(`User not found for userId: ${root.userId}`);
         }
@@ -47,5 +57,3 @@ export const resolvers: Resolvers = {
     },
   },
 };
-
-export default resolvers;

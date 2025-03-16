@@ -1,9 +1,10 @@
 /**
  * Creates a DataLoader for batching user requests by userId.
  */
-import { MeshContext, User } from "../../.mesh";
 import DataLoader from "dataloader";
 import { GraphQLResolveInfo } from "graphql";
+import { HiveGatewayContext } from "../additional-resolvers";
+import { User } from "../../generates";
 
 export interface UserResponse {
   users?: User[];
@@ -39,11 +40,11 @@ const groupUsersById = (data: UserResponse): Map<string, User> => {
   return userMap;
 };
 
-export const createUsersLoader = (context: MeshContext, info: GraphQLResolveInfo): DataLoader<string, User | null> => {
+export const createUsersLoader = (context: HiveGatewayContext, info: GraphQLResolveInfo): DataLoader<string, User | null> => {
   return new DataLoader<string, User | null>(
     async (userIds: readonly string[]) => {
       try {
-        const rawUsers = await context.UserService.Query.users({
+        const rawUsers = await context.subgraphs.USER_SERVICE.Query.users({
           root: {},
           args: { ids: userIds as string[] },
           context,

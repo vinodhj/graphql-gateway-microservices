@@ -1,9 +1,11 @@
 /**
  * Creates a DataLoader for batching expense requests by userId.
  */
-import { Expense, MeshContext } from "../../.mesh";
+
 import DataLoader from "dataloader";
 import { GraphQLResolveInfo } from "graphql";
+import { HiveGatewayContext } from "../additional-resolvers";
+import { Expense } from "../../generates";
 
 export interface ExpenseResponse {
   expenses?: Expense[];
@@ -49,11 +51,11 @@ const groupExpensesByUser = (data: ExpenseResponse): Map<string, Expense[]> => {
   return expensesByUser;
 };
 
-export const createExpensesLoader = (context: MeshContext, info: GraphQLResolveInfo): DataLoader<string, Expense[]> => {
+export const createExpensesLoader = (context: HiveGatewayContext, info: GraphQLResolveInfo): DataLoader<string, Expense[]> => {
   return new DataLoader<string, Expense[]>(
     async (userIds: readonly string[]) => {
       try {
-        const rawResult = await context.ExpenseService.Query.expensesByUsers({
+        const rawResult = await context.subgraphs.EXPENSE_SERVICE.Query.expensesByUsers({
           root: {},
           args: { userIds: userIds as string[] },
           context,
