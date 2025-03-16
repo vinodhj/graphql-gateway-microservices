@@ -6,26 +6,33 @@ import { User, Expense } from "../generates";
 
 // Define the context for Hive Gateway
 export interface HiveGatewayContext {
-  subgraphs: {
-    USER_SERVICE: any;
-    EXPENSE_SERVICE: any;
-  };
+  ExpenseService: any;
+  UserService: any;
   expensesLoader?: DataLoader<string, Expense[]>;
   usersLoader?: DataLoader<string, User | null>;
 }
 
 function adaptContext(hiveContext: HiveGatewayContext): any {
+  // Check for both lowercase and uppercase keys.
+  const expenseServiceQuery = hiveContext.ExpenseService.query || hiveContext.ExpenseService.Query;
+  if (!expenseServiceQuery?.expensesByUsers) {
+    throw new Error("ExpenseService does not have a valid 'expensesByUsers' query method");
+  }
+
+  const userServiceQuery = hiveContext.UserService.query || hiveContext.UserService.Query;
+  if (!userServiceQuery?.users) {
+    throw new Error("UserService does not have a valid 'users' query method");
+  }
+
   return {
     ["UserService"]: {
       query: {
-        // Map old methods to new subgraph methods
-        users: (args: any) => hiveContext.subgraphs.USER_SERVICE.users(args),
+        users: (args: any) => userServiceQuery.users(args),
       },
     },
     ["ExpenseService"]: {
       query: {
-        // Map old methods to new subgraph methods
-        expensesByUsers: (args: any) => hiveContext.subgraphs.EXPENSE_SERVICE.expensesByUsers(args),
+        expensesByUsers: (args: any) => expenseServiceQuery.expensesByUsers(args),
       },
     },
   };

@@ -41,10 +41,15 @@ const groupUsersById = (data: UserResponse): Map<string, User> => {
 };
 
 export const createUsersLoader = (context: HiveGatewayContext, info: GraphQLResolveInfo): DataLoader<string, User | null> => {
+  const userServiceQuery = context.UserService.query || context.UserService.Query;
+  if (!userServiceQuery?.users) {
+    throw new Error("UserService does not have a valid  query method");
+  }
+
   return new DataLoader<string, User | null>(
     async (userIds: readonly string[]) => {
       try {
-        const rawUsers = await context.subgraphs.USER_SERVICE.Query.users({
+        const rawUsers = await userServiceQuery.users({
           root: {},
           args: { ids: userIds as string[] },
           context,

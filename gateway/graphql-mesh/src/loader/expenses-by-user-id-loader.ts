@@ -52,10 +52,15 @@ const groupExpensesByUser = (data: ExpenseResponse): Map<string, Expense[]> => {
 };
 
 export const createExpensesLoader = (context: HiveGatewayContext, info: GraphQLResolveInfo): DataLoader<string, Expense[]> => {
+  const expenseServiceQuery = context.ExpenseService.query || context.ExpenseService.Query;
+  if (!expenseServiceQuery) {
+    throw new Error("UserService does not have a valid  query method");
+  }
+
   return new DataLoader<string, Expense[]>(
     async (userIds: readonly string[]) => {
       try {
-        const rawResult = await context.subgraphs.EXPENSE_SERVICE.Query.expensesByUsers({
+        const rawResult = await expenseServiceQuery.expensesByUsers({
           root: {},
           args: { userIds: userIds as string[] },
           context,
