@@ -103,7 +103,6 @@ type Mutation {
 - **Schema Registry Integration**: Centralizes schema management and versioning
 - **Query Planning**: Implements intelligent query planning and optimization
 - **Request Routing**: Advanced routing strategies based on schema capabilities
-- **Monitoring**: Real-time analytics and performance tracking
 - **Caching Strategy**: Multi-level caching with intelligent invalidation
 - **Automatic Updates**: Self-healing schema composition and updates
 
@@ -279,12 +278,11 @@ flowchart TD
 
 #### 1.7.1 Environment Variables
 
-| Component        | Variable                 | Purpose                  | Default  |
-| ---------------- | ------------------------ | ------------------------ | -------- |
-| Mesh Gateway     | SERVICE_USER_ENDPOINT    | User service URL         | N/A      |
-| Mesh Gateway     | SERVICE_EXPENSE_ENDPOINT | Expense service URL      | N/A      |
-| Schema-Stitching | CACHE_TTL                | Cache timeout in seconds | 300      |
-| Schema-Stitching | SERVICE_TIMEOUT_MS       | Service call timeout     | 5000     |
-| Hive Gateway     | CACHE_STRATEGY           | Caching strategy         | adaptive |
-| User Service     | CACHE_ENABLED            | Toggle caching           | true     |
-| Expense Service  | BATCH_SIZE               | DataLoader batch size    | 20       |
+| Component        | Variable                 | Purpose                  | Default |
+| ---------------- | ------------------------ | ------------------------ | ------- |
+| Mesh Gateway     | SERVICE_USER_ENDPOINT    | User service URL         | N/A     |
+| Mesh Gateway     | SERVICE_EXPENSE_ENDPOINT | Expense service URL      | N/A     |
+| Schema-Stitching | CACHE_TTL                | Cache timeout in seconds | 300     |
+| Schema-Stitching | SERVICE_TIMEOUT_MS       | Service call timeout     | 5000    |
+| User Service     | CACHE_ENABLED            | Toggle caching           | true    |
+| Expense Service  | BATCH_SIZE               | DataLoader batch size    | 20      |

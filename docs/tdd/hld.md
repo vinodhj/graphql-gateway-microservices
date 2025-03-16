@@ -88,7 +88,6 @@ flowchart TD
     HiveGateway --> ExpenseService
 
     HiveGateway --- SchemaRegistry[(Schema Registry)]
-    HiveGateway --- Analytics[(Analytics & Monitoring)]
 
     UserService --> UserDL
     UserDL --> UserCache
@@ -112,7 +111,7 @@ flowchart TD
     class MeshGateway,StitchingGateway,HiveGateway gateway
     class UserService,ExpenseService service
     class UserDL,UserCache,ExpenseDL,ExpenseCache optimization
-    class UserDB,ExpenseDB,SchemaRegistry,Analytics db
+    class UserDB,ExpenseDB,SchemaRegistry db
     class Client client
     class CloudflareWorkers platform
 ```
@@ -142,7 +141,6 @@ flowchart TD
 - **Key Features**:
   - Centralized schema management via Schema Registry
   - Intelligent request routing and caching strategies
-  - Real-time analytics and performance monitoring
   - Automatic schema updates and versioning
 
 #### 1.3.4 User Microservice
@@ -272,7 +270,6 @@ sequenceDiagram
         ExpenseService-->>-Hive: Return Expense Data
     end
 
-    Hive->>Hive: Record Analytics
     Hive-->>-Client: Optimized Combined Response
 ```
 
@@ -280,6 +277,6 @@ sequenceDiagram
 
 - **Caching**: Implemented at multiple levels (gateway, service, DataLoader)
 - **Batching**: Achieved through DataLoader implementation
-- **Monitoring**: Worker analytics, custom metrics, and Hive Gateway analytics
+- **Monitoring**: Worker analytics and custom metrics
 - **Performance Optimization**: Designed to minimize redundant lookups
 - **Schema Management**: Centralized via Hive Schema Registry for the Hive Gateway implementation
