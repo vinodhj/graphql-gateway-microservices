@@ -7,7 +7,7 @@ export const composeConfig = defineComposeConfig({
     {
       sourceHandler: loadGraphQLHTTPSubgraph("UserService", {
         source: "USER_SERVICE",
-        endpoint: "https://user-service.vinodh-jeevanantham.workers.dev/graphql",
+        endpoint: "http://localhost:7501/graphql",
         method: "POST",
         operationHeaders: {
           "Content-Type": "application/json",
@@ -20,7 +20,7 @@ export const composeConfig = defineComposeConfig({
     {
       sourceHandler: loadGraphQLHTTPSubgraph("ExpenseService", {
         source: "EXPENSE_SERVICE",
-        endpoint: "https://expense-service.vinodh-jeevanantham.workers.dev/graphql",
+        endpoint: "http://localhost:7502/graphql",
         method: "POST",
         operationHeaders: {
           "Content-Type": "application/json",
