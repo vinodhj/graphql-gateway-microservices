@@ -1,7 +1,7 @@
-import { createMeshHTTPHandler } from "@graphql-mesh/http";
-import { getMesh } from "@graphql-mesh/runtime";
-import { createDevTimingHandler } from "./create-dev-timing-handler";
-import { GraphQLError } from "graphql";
+import { createGatewayRuntime, GatewayConfig } from "@graphql-hive/gateway-runtime";
+import httpTransport from "@graphql-mesh/transport-http";
+import { gatewayConfig } from "../mesh.config";
+import { supergraphSdl } from ".././supergraph-string";
 
 export interface Env {
   USER_SERVICE_URL: string;
@@ -29,98 +29,59 @@ export default {
         },
       });
     }
+
     try {
       const isDevelopment = env.WORKER_ENV === "dev";
       console.log(`Running in ${isDevelopment ? "development" : "production"} mode`);
       console.log(`User service URL: ${env.USER_SERVICE_URL}`);
       console.log(`Expense service URL: ${env.EXPENSE_SERVICE_URL}`);
 
-      const customGetBuiltMesh = async () => {
-        // Import the mesh options but NOT the existing getBuiltMesh
-        const { getMeshOptions } = await import("../.mesh");
-        // Get fresh options
-        const options = await getMeshOptions();
-
-        // Override the sources' fetch functions with service bindings
-        // This is the key part that makes service bindings work
-        if (options.sources && Array.isArray(options.sources)) {
-          for (const source of options.sources) {
-            if (source.name === "UserService" && env.USER_SERVICE_WORKER) {
-              // @ts-ignore - we're modifying the handler configuration at runtime
-              source.handler.config = source.handler.config || {};
-              // @ts-ignore - attach the service binding's fetch method
-              source.handler.config.fetch = env.USER_SERVICE_WORKER.fetch.bind(env.USER_SERVICE_WORKER);
+      // Create the gateway runtime
+      const gateway = createGatewayRuntime({
+        ...(gatewayConfig as GatewayConfig),
+        supergraph: supergraphSdl,
+        transports: {
+          http: httpTransport,
+        },
+        fetchAPI: {
+          fetch: (url, options) => {
+            // Determine which service to call based on the URL
+            if (url.includes(env.USER_SERVICE_URL)) {
+              return env.USER_SERVICE_WORKER.fetch(url, options);
+            } else if (url.includes(env.EXPENSE_SERVICE_URL)) {
+              return env.EXPENSE_SERVICE_WORKER.fetch(url, options);
             }
-
-            if (source.name === "ExpenseService" && env.EXPENSE_SERVICE_WORKER) {
-              // @ts-ignore - we're modifying the handler configuration at runtime
-              source.handler.config = source.handler.config || {};
-              // @ts-ignore - attach the service binding's fetch method
-              source.handler.config.fetch = env.EXPENSE_SERVICE_WORKER.fetch.bind(env.EXPENSE_SERVICE_WORKER);
-            }
-          }
-        }
-
-        if (isDevelopment) {
-          // Only add timing plugin in development
-          options.additionalEnvelopPlugins = options.additionalEnvelopPlugins || [];
-          options.additionalEnvelopPlugins.push({
-            onExecute({ args }) {
-              const startTime = Date.now();
-              const operationName = args.operationName ?? "anonymous";
-              const { variableValues } = args;
-
-              // Log operation start
-              console.log(`Executing operation: ${operationName}`, {
-                variables: variableValues || {},
-              });
-
-              return {
-                onExecuteDone() {
-                  const duration = Date.now() - startTime;
-                  console.log(`Actual GraphQL execution time from plugin Query : ${operationName} execution took ${duration}ms`);
-                },
-                onExecuteError({ error }: { error: GraphQLError }) {
-                  const duration = Date.now() - startTime;
-                  console.error(`Error in ${operationName} after ${duration}ms:`, error);
-                  console.error("Error Stack:", error.stack);
-
-                  // GraphQLError often contains an originalError property but it's not in the type
-                  // So we need to handle it with type assertion
-                  const gqlError = error as GraphQLError & { originalError?: Error };
-                  if (gqlError.originalError) {
-                    console.error("Original Error:", gqlError.originalError);
-                  }
-                },
-              };
-            },
-          });
-        }
-
-        // Create a new mesh instance directly
-        return getMesh(options);
-      };
-
-      // Create a new handler using our custom function
-      const meshHandler = createMeshHTTPHandler({
-        baseDir: ".",
-        getBuiltMesh: customGetBuiltMesh,
-        rawServeConfig: {
-          cors: {
-            origin: "*",
-            credentials: true,
+            // Fallback to default fetch if no match
+            return fetch(url, options);
           },
-          playground: true,
         },
       });
 
-      // Use the timing handler in development, raw handler in production
-      const handlerToUse = isDevelopment ? createDevTimingHandler(meshHandler) : meshHandler;
+      // Make sure to dispose the gateway when done
+      const disposeMethod = gateway[Symbol.asyncDispose];
+      if (typeof disposeMethod === "function") {
+        const disposePromise = disposeMethod.call(gateway);
+        ctx.waitUntil(Promise.resolve(disposePromise));
+      }
 
-      // Handle the request
-      return await handlerToUse.fetch(request, env, ctx);
+      // Process the request
+      const response = await gateway(request);
+
+      // Add CORS headers to the response if they're not already present
+      if (response && !response.headers.has("Access-Control-Allow-Origin")) {
+        const headers = new Headers(response.headers);
+        headers.set("Access-Control-Allow-Origin", "*");
+
+        return new Response(response.body, {
+          status: response.status,
+          statusText: response.statusText,
+          headers,
+        });
+      }
+
+      return response;
     } catch (error) {
-      console.error("Mesh error:", error);
+      console.error("Gateway error:", error);
 
       return new Response(
         JSON.stringify({
