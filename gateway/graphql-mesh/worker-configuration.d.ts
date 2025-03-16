@@ -4,4 +4,6 @@ interface Env {
   USER_SERVICE_URL: string;
   EXPENSE_SERVICE_URL: string;
   WORKER_ENV: string;
+  USER_SERVICE_WORKER: Fetcher;
+  EXPENSE_SERVICE_WORKER: Fetcher;
 }

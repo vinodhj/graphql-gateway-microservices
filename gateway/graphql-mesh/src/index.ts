@@ -7,6 +7,12 @@ export interface Env {
   USER_SERVICE_URL: string;
   EXPENSE_SERVICE_URL: string;
   WORKER_ENV: string;
+  USER_SERVICE_WORKER: Fetcher;
+  EXPENSE_SERVICE_WORKER: Fetcher;
+}
+
+interface Fetcher {
+  fetch: typeof fetch;
 }
 
 export default {
@@ -34,6 +40,26 @@ export default {
         const { getMeshOptions } = await import("../.mesh");
         // Get fresh options
         const options = await getMeshOptions();
+
+        // Override the sources' fetch functions with service bindings
+        // This is the key part that makes service bindings work
+        if (options.sources && Array.isArray(options.sources)) {
+          for (const source of options.sources) {
+            if (source.name === "UserService" && env.USER_SERVICE_WORKER) {
+              // @ts-ignore - we're modifying the handler configuration at runtime
+              source.handler.config = source.handler.config || {};
+              // @ts-ignore - attach the service binding's fetch method
+              source.handler.config.fetch = env.USER_SERVICE_WORKER.fetch.bind(env.USER_SERVICE_WORKER);
+            }
+
+            if (source.name === "ExpenseService" && env.EXPENSE_SERVICE_WORKER) {
+              // @ts-ignore - we're modifying the handler configuration at runtime
+              source.handler.config = source.handler.config || {};
+              // @ts-ignore - attach the service binding's fetch method
+              source.handler.config.fetch = env.EXPENSE_SERVICE_WORKER.fetch.bind(env.EXPENSE_SERVICE_WORKER);
+            }
+          }
+        }
 
         if (isDevelopment) {
           // Only add timing plugin in development
