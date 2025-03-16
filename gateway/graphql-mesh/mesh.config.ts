@@ -1,5 +1,5 @@
 import { loadGraphQLHTTPSubgraph, defineConfig as defineComposeConfig } from "@graphql-mesh/compose-cli";
-import { default as additionalResolvers$0 } from "./src/additional-resolvers.ts";
+import { default as additionalResolvers$0 } from "./src/additional-resolvers";
 import { defineConfig as defineGatewayConfig } from "@graphql-hive/gateway";
 
 export const composeConfig = defineComposeConfig({
