@@ -3,23 +3,24 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "build": "bun run prebuild:mesh && wrangler build",
-    "prebuild:mesh": "mesh build --output .mesh",
-    "mesh:dev": "mesh dev",
     "deploy": "bun run build && wrangler deploy",
     "dev": "(kill -9 $(lsof -t -i:7500) || true) && wrangler dev --name graphql-mesh --port 7500 --inspector-port 7300",
     "start": "wrangler dev",
     "test": "vitest",
-    "cf-typegen": "wrangler types"
+    "cf-typegen": "wrangler types",
+    "codegen": "graphql-codegen --config codegen.ts",
+    "build-supergraph": "mesh-compose -o supergraph.graphql"
   },
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "^0.7.5",
     "@cloudflare/workers-types": "^4.20250312.0",
+    "@graphql-codegen/typescript-generic-sdk": "^4.0.1",
     "typescript": "^5.5.2",
     "vitest": "~3.0.7",
     "wrangler": "^3.114.1"
   },
   "dependencies": {
+    "@graphql-codegen/cli": "^5.0.5",
     "@graphql-hive/gateway": "^1.12.1",
     "@graphql-mesh/compose-cli": "^1.4.1",
     "@graphql-mesh/graphql": "^0.104.1",

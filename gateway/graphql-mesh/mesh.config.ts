@@ -6,7 +6,6 @@ export const composeConfig = defineComposeConfig({
   subgraphs: [
     {
       sourceHandler: loadGraphQLHTTPSubgraph("UserService", {
-        source: "USER_SERVICE",
         endpoint: "http://localhost:7501/graphql",
         method: "POST",
         operationHeaders: {
@@ -19,7 +18,6 @@ export const composeConfig = defineComposeConfig({
     },
     {
       sourceHandler: loadGraphQLHTTPSubgraph("ExpenseService", {
-        source: "EXPENSE_SERVICE",
         endpoint: "http://localhost:7502/graphql",
         method: "POST",
         operationHeaders: {
