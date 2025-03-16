@@ -4,21 +4,13 @@
  */
 {
   "$schema": "../../node_modules/wrangler/config-schema.json",
-  "name": "graphql-tools",
+  "name": "hive-gateway",
   "main": "src/index.ts",
-  "compatibility_date": "2025-03-03",
+  "compatibility_date": "2025-03-13",
   "observability": {
     "enabled": true,
   },
   "compatibility_flags": ["nodejs_compat"],
-  "env": {
-    "dev": {
-      "vars": {
-        "USER_SERVICE_URL": "http://localhost:7501/graphql",
-        "EXPENSE_SERVICE_URL": "http://localhost:7502/graphql",
-      },
-    },
-  },
   "services": [
     {
       "binding": "USER_SERVICE_WORKER",
@@ -29,7 +21,6 @@
       "service": "expense-service",
     },
   ],
-
   /**
    * Smart Placement
    * Docs: https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement

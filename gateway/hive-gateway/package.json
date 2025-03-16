@@ -1,0 +1,34 @@
+{
+  "name": "hive-gateway",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "(kill -9 $(lsof -t -i:7500) || true) && wrangler dev --name graphql-tools --port 7500 --inspector-port 7300",
+    "start": "wrangler dev",
+    "test": "vitest",
+    "cf-typegen": "wrangler types",
+    "codegen": "graphql-codegen --config codegen.ts",
+    "build-supergraph": "mesh-compose -o supergraph.graphql",
+    "hive-gateway": "npx hive-gateway supergraph"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.7.5",
+    "@cloudflare/workers-types": "^4.20250313.0",
+    "@graphql-codegen/typescript-generic-sdk": "^4.0.1",
+    "@parcel/watcher": "^2.5.1",
+    "typescript": "^5.5.2",
+    "vitest": "~3.0.7",
+    "wrangler": "^4.0.0"
+  },
+  "dependencies": {
+    "@graphql-codegen/cli": "^5.0.5",
+    "@graphql-hive/gateway": "^1.12.1",
+    "@graphql-mesh/compose-cli": "^1.4.1",
+    "@graphql-mesh/graphql": "^0.104.1",
+    "@graphql-mesh/migrate-config-cli": "^1.6.1",
+    "@graphql-mesh/utils": "^0.104.1",
+    "dataloader": "^2.2.3",
+    "graphql": "^16.10.0"
+  }
+}
