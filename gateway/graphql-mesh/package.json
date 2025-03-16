@@ -22,9 +22,7 @@
   "dependencies": {
     "@graphql-hive/gateway": "^1.12.1",
     "@graphql-mesh/compose-cli": "^1.4.1",
-    "@graphql-mesh/cross-helpers": "^0.4.10",
     "@graphql-mesh/graphql": "^0.104.1",
-    "@graphql-mesh/http-handler": "^0.0.1-alpha-20231120143216-c55e37539",
     "@graphql-mesh/migrate-config-cli": "^1.6.1",
     "@graphql-mesh/utils": "^0.104.1",
     "dataloader": "^2.2.3",
