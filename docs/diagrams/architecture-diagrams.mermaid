@@ -6,6 +6,7 @@ graph TD
     subgraph "Gateway Layer"
         GM[GraphQL Mesh Gateway]
         GS[Schema-stitching Gateway]
+        HG[Hive Gateway]
     end
     
     subgraph "Microservices Layer"
@@ -16,17 +17,24 @@ graph TD
     subgraph "Data Storage"
         UserDB[(User Database)]
         ExpenseDB[(Expense Database)]
+        SchemaRegistry[(Schema Registry)]
     end
     
     %% Client connections
     Client -->|GraphQL Query| GM
     Client -->|GraphQL Query| GS
+    Client -->|GraphQL Query| HG
     
     %% Gateway connections
     GM -->|Forward Queries| UserService
     GM -->|Forward Queries| ExpenseService
     GS -->|Forward Queries| UserService
     GS -->|Forward Queries| ExpenseService
+    HG -->|Forward Queries| UserService
+    HG -->|Forward Queries| ExpenseService
+    
+    %% Hive specific connections
+    HG <-->|Schema Management| SchemaRegistry
     
     %% Service connections
     UserService -->|CRUD Operations| UserDB
@@ -41,6 +49,6 @@ graph TD
     classDef service fill:#bbf,stroke:#333,stroke-width:1px
     classDef database fill:#dfd,stroke:#333,stroke-width:1px
     
-    class GM,GS gateway
+    class GM,GS,HG gateway
     class UserService,ExpenseService service
-    class UserDB,ExpenseDB database
+    class UserDB,ExpenseDB,SchemaRegistry database

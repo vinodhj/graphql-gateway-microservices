@@ -2,6 +2,8 @@ sequenceDiagram
     participant Client
     participant Mesh as GraphQL Mesh Gateway
     participant Stitching as Schema-stitching Gateway
+    participant Hive as Hive Gateway
+    participant Registry as Schema Registry
     participant UserService
     participant UserDB as User Database
     participant ExpenseService
@@ -85,3 +87,25 @@ sequenceDiagram
     end
     
     Stitching-->>Client: Combined Response
+    
+    Note over Client,ExpenseDB: Hive Gateway with enhanced capabilities
+    
+    Client->>Hive: GraphQL Query
+    Hive->>Registry: Validate Schema
+    Registry-->>Hive: Schema Validation Result
+    Hive->>Hive: Optimize Query Plan
+    Hive->>Hive: Apply Caching Strategies
+    
+    alt Query requires User data
+        Hive->>UserService: Optimized User Requests
+        UserService->>UserService: Process User Request
+        UserService-->>Hive: Return User Data
+    end
+    
+    alt Query requires Expense data
+        Hive->>ExpenseService: Optimized Expense Requests
+        ExpenseService->>ExpenseService: Process Expense Request
+        ExpenseService-->>Hive: Return Expense Data
+    end
+    
+    Hive-->>Client: Optimized Combined Response
