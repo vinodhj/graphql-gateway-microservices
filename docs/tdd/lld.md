@@ -286,3 +286,25 @@ flowchart TD
 | Schema-Stitching | SERVICE_TIMEOUT_MS       | Service call timeout     | 5000    |
 | User Service     | CACHE_ENABLED            | Toggle caching           | true    |
 | Expense Service  | BATCH_SIZE               | DataLoader batch size    | 20      |
+
+### 1.8 Hive Gateway Cloudflare Workers Deployment
+
+Hive Gateway can be deployed to Cloudflare Workers for a serverless implementation. This deployment strategy differs from traditional approaches due to the constraints of the Workers environment.
+
+#### 1.8.1 Key Implementation Steps
+
+1. **Configuration**: Define subgraphs and relationships in mesh.config.ts
+2. **Supergraph Generation**: Pre-build the supergraph schema for deployment
+3. **Service Binding**: Implement service bindings for inter-service communication
+4. **Resource Management**: Utilize proper async disposal for the gateway runtime
+
+#### 1.8.2 Production Considerations
+
+| Component                   | Consideration         | Approach                              |
+| --------------------------- | --------------------- | ------------------------------------- |
+| Schema Updates              | No filesystem access  | Pre-build supergraph.js file          |
+| Inter-service Communication | Service isolation     | Cloudflare service bindings           |
+| Resource Management         | Memory constraints    | Proper async disposal                 |
+| Deployment                  | Manual schema updates | CI/CD pipeline with schema generation |
+
+For detailed implementation instructions, refer to the [Hive Gateway Cloudflare Workers documentation](https://the-guild.dev/graphql/hive/docs/gateway/deployment/serverless/cloudflare-workers).

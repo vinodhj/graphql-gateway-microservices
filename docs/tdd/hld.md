@@ -280,3 +280,33 @@ sequenceDiagram
 - **Monitoring**: Worker analytics and custom metrics
 - **Performance Optimization**: Designed to minimize redundant lookups
 - **Schema Management**: Centralized via Hive Schema Registry for the Hive Gateway implementation
+
+## 1.6 Hive Gateway Serverless Deployment Strategy
+
+### 1.6.1 Cloudflare Workers Deployment
+
+The GraphQL Gateway utilizes Hive Gateway deployed on Cloudflare Workers to provide a serverless, globally distributed entry point for the application. This deployment strategy offers several architectural advantages:
+
+- **Global Distribution**: Automatically deployed to Cloudflare's global edge network for low-latency responses
+- **Serverless Execution**: No infrastructure management required, with auto-scaling based on demand
+- **Service Mesh Integration**: Direct service-to-service communication through Cloudflare Workers service bindings
+
+### 1.6.2 Architectural Considerations
+
+The serverless gateway architecture introduces specific considerations:
+
+1. **Pre-compiled Schema**: The supergraph schema must be pre-compiled during the build process due to serverless constraints
+2. **Cross-Service Communication**: Service bindings are used for direct worker-to-worker communication, reducing network latency
+3. **Deployment Pipeline**: Schema generation is integrated into the CI/CD pipeline to ensure consistency between environments
+4. **Schema Updates**: Schema changes require a coordinated deployment strategy across services
+
+### 1.6.3 Resilience Strategy
+
+The gateway implements several strategies to ensure resilience in the serverless environment:
+
+- **Graceful Degradation**: Services can operate independently if other services are unavailable
+- **Query Optimization**: Automatic query planning to minimize cross-service requests
+- **Response Caching**: Strategic caching at the edge for frequently requested data
+- **Resource Management**: Proper disposal of resources to optimize serverless execution
+
+For implementation details, refer to the comprehensive Hive Gateway Cloudflare Workers documentation.
