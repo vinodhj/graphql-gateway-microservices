@@ -7,6 +7,7 @@
     "prebuild:mesh": "mesh build --output .mesh",
     "mesh:dev": "mesh dev",
     "deploy": "bun run build && wrangler deploy",
+    "bundle-size": "wrangler deploy --dry-run",
     "dev": "(kill -9 $(lsof -t -i:7500) || true) && wrangler dev --name graphql-mesh --port 7500 --inspector-port 7300",
     "start": "wrangler dev",
     "test": "vitest",

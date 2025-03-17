@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "deploy": "wrangler deploy",
+    "bundle-size": "wrangler build && wrangler deploy --dry-run",
     "dev": "(kill -9 $(lsof -t -i:7500) || true) && wrangler dev --name graphql-tools --port 7500 --inspector-port 7300",
     "start": "wrangler dev",
     "test": "vitest",
