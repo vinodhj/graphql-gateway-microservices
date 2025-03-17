@@ -40,19 +40,20 @@ Three gateway approaches are implemented for comparison:
 ### Hive Gateway
 
 - **Implementation**:  
-  Uses [Hive Gateway](https://the-guild.dev/graphql/hive) to provide a fully managed GraphQL gateway solution.
+  Uses [Hive Gateway](https://the-guild.dev/graphql/hive) deployed on Cloudflare Workers with pre-compiled supergraph schema.
 
 - **Key Features**:
 
-  - Schema Registry integration for centralized schema management
-  - Built-in schema validation and composition
-  - Performance analytics and monitoring capabilities
-  - Automatic schema updates and versioning
+  - Pre-compiled supergraph for unified schema representation
+  - Service bindings for direct Cloudflare Worker-to-Worker communication
+  - Proper resource management with runtime disposal
+  - Cross-service query execution optimization
 
 - **Optimization**:
-  - Intelligent request routing and caching strategies
-  - Query planning and execution optimization
-  - Real-time analytics for performance tuning
+  - Query planning based on pre-compiled supergraph
+  - Efficient routing of query fragments to appropriate services
+  - Parallel execution of cross-service queries
+  - Service binding approach for reduced network overhead
 
 ## Tech Stack
 
