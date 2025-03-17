@@ -234,22 +234,25 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    A[Client Request] --> B[Schema Registry Validation]
-    B --> C[Query Analysis & Planning]
-    C --> D{Query Complexity Check}
+    A[Client Request] --> B[Create Gateway Runtime]
+    B --> C[Parse GraphQL Request]
+    C --> D[Supergraph Schema Validation]
 
-    D -- Simple --> E[Direct Service Delegation]
-    D -- Complex --> F[Query Splitting & Optimization]
+    D --> E{Query Complexity}
 
-    F --> G[Parallel Execution]
-    E --> H[Performance Analytics]
-    G --> I[Result Composition]
-    I --> H
+    E -- Single Service --> F[Direct Service Binding Call]
+    E -- Multi-Service --> G[Query Splitting]
 
-    H --> J[Cache Decision]
-    J -- Cache --> K[Update Cache]
-    J -- No Cache --> L[Return Response]
-    K --> L
+    G --> H[Parallel Execution via Service Bindings]
+    F --> I[Service Processing]
+    H --> J[Results Processing]
+
+    J --> K[Merge Results]
+    I --> K
+
+    K --> L[Response Generation]
+    L --> M[Resource Disposal]
+    M --> N[Return Response]
 
     classDef start fill:#f9f9f9,stroke:#333,stroke-width:1px,color:#333
     classDef process fill:#bbf,stroke:#333,stroke-width:1px,color:#333
@@ -257,9 +260,9 @@ flowchart TD
     classDef endNode fill:#dfd,stroke:#333,stroke-width:1px,color:#333
 
     class A start
-    class D,J decision
-    class B,C,E,F,G,H,I,K process
-    class L endNode
+    class E decision
+    class B,C,D,F,G,H,I,J,K,L,M process
+    class N endNode
 ```
 
 ### 1.6 Error Handling Strategy

@@ -4,6 +4,41 @@
 
 Hive Gateway provides a cross-platform GraphQL Server that can be integrated into various platforms beyond Node.js. This document outlines the specific implementation details for deploying Hive Gateway to Cloudflare Workers, a serverless execution environment that allows you to create applications without managing infrastructure.
 
+#### 1.2 Hive Gateway Optimization Flow
+
+```mermaid
+flowchart TD
+    A[Client Request] --> B[Create Gateway Runtime]
+    B --> C[Parse GraphQL Request]
+    C --> D[Supergraph Schema Validation]
+
+    D --> E{Query Complexity}
+
+    E -- Single Service --> F[Direct Service Binding Call]
+    E -- Multi-Service --> G[Query Splitting]
+
+    G --> H[Parallel Execution via Service Bindings]
+    F --> I[Service Processing]
+    H --> J[Results Processing]
+
+    J --> K[Merge Results]
+    I --> K
+
+    K --> L[Response Generation]
+    L --> M[Resource Disposal]
+    M --> N[Return Response]
+
+    classDef start fill:#f9f9f9,stroke:#333,stroke-width:1px,color:#333
+    classDef process fill:#bbf,stroke:#333,stroke-width:1px,color:#333
+    classDef decision fill:#ffd,stroke:#333,stroke-width:1px,color:#333
+    classDef endNode fill:#dfd,stroke:#333,stroke-width:1px,color:#333
+
+    class A start
+    class E decision
+    class B,C,D,F,G,H,I,J,K,L,M process
+    class N endNode
+```
+
 ### 2. Implementation Flow
 
 The deployment process for Hive Gateway on Cloudflare Workers differs from traditional deployments due to the serverless nature and specific constraints of the Workers environment.
