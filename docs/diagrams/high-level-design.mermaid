@@ -16,6 +16,13 @@ flowchart TD
             GS_Timeout["Executor Timeouts"]
             GS_Schema["Manual Schema Stitching"]
         end
+
+        subgraph "Hive Gateway"
+            HG_Supergraph["Pre-compiled Supergraph"]
+            HG_Runtime["Gateway Runtime"]
+            HG_ServiceBindings["Service Bindings"]
+            HG_Router["GraphQL Router"]
+        end
     end
     
     subgraph "Microservices (CF Workers)"
@@ -36,6 +43,7 @@ flowchart TD
     
     Client --> GM_Schema
     Client --> GS_Schema
+    Client --> HG_Router
     
     GM_Schema --> GM_Resolvers
     GM_Resolvers --> GM_DL
@@ -43,6 +51,10 @@ flowchart TD
     GS_Schema --> GS_DL
     GS_DL --> GS_Cache
     GS_Schema --> GS_Timeout
+    
+    HG_Router --> HG_Runtime
+    HG_Runtime --> HG_Supergraph
+    HG_Runtime --> HG_ServiceBindings
     
     GM_DL --> US_API
     GM_DL --> ES_API
@@ -52,6 +64,9 @@ flowchart TD
     
     GS_Cache --> US_API
     GS_Cache --> ES_API
+    
+    HG_ServiceBindings --> US_API
+    HG_ServiceBindings --> ES_API
     
     US_API --> US_DL
     US_DL --> US_Cache
@@ -72,7 +87,7 @@ flowchart TD
     classDef database fill:#90ee90,stroke:#333,stroke-width:1px
     
     class Client client
-    class GM_Schema,GM_Resolvers,GS_Schema,GS_Timeout gateway
+    class GM_Schema,GM_Resolvers,GS_Schema,GS_Timeout,HG_Router,HG_Supergraph,HG_Runtime gateway
     class US_API,ES_API service
-    class GM_DL,GS_Cache,GS_DL,US_Cache,US_DL,ES_Cache,ES_DL optimization
+    class GM_DL,GS_Cache,GS_DL,US_Cache,US_DL,ES_Cache,ES_DL,HG_ServiceBindings optimization
     class US_DB,ES_DB database

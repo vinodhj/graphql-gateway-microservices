@@ -1,23 +1,27 @@
 graph TD
-    subgraph "Client Layer"
+    subgraph ClientLayer["Client Layer"]
         Client[Client Applications]
     end
     
-    subgraph "Gateway Layer"
-        GM[GraphQL Mesh Gateway]
-        GS[Schema-stitching Gateway]
-        HG[Hive Gateway]
+    subgraph cfLayer["Cloudflare Workers"]
+	    subgraph GatewayLayer["Gateway Layer"]
+	        GM[GraphQL Mesh Gateway]
+	        GS[Schema-stitching Gateway]
+	        HG[Hive Gateway]
+	    end
     end
     
-    subgraph "Microservices Layer"
-        UserService[User Microservice]
-        ExpenseService[Expense Tracker Microservice]
+    subgraph cfMsLayer["Cloudflare Workers"]
+	    subgraph ServiceLayer["Microservices Layer"]
+	        UserService[User Microservice]
+	        ExpenseService[Expense Tracker Microservice]
+	    end
     end
     
-    subgraph "Data Storage"
+    subgraph DataLayer["Data Storage"]
         UserDB[(User Database)]
         ExpenseDB[(Expense Database)]
-        SchemaRegistry[(Schema Registry)]
+        Supergraph[(Pre-compiled Supergraph)]
     end
     
     %% Client connections
@@ -26,15 +30,15 @@ graph TD
     Client -->|GraphQL Query| HG
     
     %% Gateway connections
-    GM -->|Forward Queries| UserService
-    GM -->|Forward Queries| ExpenseService
-    GS -->|Forward Queries| UserService
-    GS -->|Forward Queries| ExpenseService
-    HG -->|Forward Queries| UserService
-    HG -->|Forward Queries| ExpenseService
+    GM -->|Service Bindings| UserService
+    GM -->|Service Bindings| ExpenseService
+    GS -->|Service Bindings| UserService
+    GS -->|Service Bindings| ExpenseService
+    HG -->|Service Bindings| UserService
+    HG -->|Service Bindings| ExpenseService
     
     %% Hive specific connections
-    HG <-->|Schema Management| SchemaRegistry
+    HG <-->|Schema Reference| Supergraph
     
     %% Service connections
     UserService -->|CRUD Operations| UserDB
@@ -44,11 +48,16 @@ graph TD
     ExpenseService -.->|User Data Lookup| UserService
     UserService -.->|Expense Data Lookup| ExpenseService
     
+    %% Build Pipeline
+    BuildPipeline[CI/CD Pipeline] -->|Generates| Supergraph
+    
     %% Labels
     classDef gateway fill:#f9f,stroke:#333,stroke-width:2px
     classDef service fill:#bbf,stroke:#333,stroke-width:1px
     classDef database fill:#dfd,stroke:#333,stroke-width:1px
+    classDef cloudflare fill:#b3e0ff,stroke:#333,stroke-width:1px
     
     class GM,GS,HG gateway
     class UserService,ExpenseService service
-    class UserDB,ExpenseDB,SchemaRegistry database
+    class UserDB,ExpenseDB,Supergraph database
+    class GM,GS,HG,UserService,ExpenseService cloudflare

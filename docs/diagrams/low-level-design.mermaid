@@ -18,6 +18,21 @@ flowchart TB
         GS_Response[Combine & Respond]
     end
     
+    subgraph "Hive Gateway Implementation"
+        HG_Request[Client Request]
+        HG_Runtime[Create Gateway Runtime]
+        HG_Parse[Parse GraphQL Request]
+        HG_DetermineTarget[Determine Target Services]
+        HG_QueryPlan[Use Pre-compiled Supergraph]
+        HG_User[Call USER_SERVICE_WORKER]
+        HG_Expense[Call EXPENSE_SERVICE_WORKER]
+        HG_CrossService[Execute Cross-Service Subqueries]
+        HG_Process[Process Responses]
+        HG_Merge[Merge Results]
+        HG_Response[Return Response]
+        HG_Dispose[Dispose Gateway]
+    end
+    
     subgraph "User Service"
         US_Endpoint[GraphQL Endpoint]
         US_Resolver[Resolve Query]
@@ -54,6 +69,21 @@ flowchart TB
     GS_BatchUser --> GS_Response
     GS_BatchExpense --> GS_Response
     
+    %% Hive Gateway flow
+    HG_Request --> HG_Runtime
+    HG_Runtime --> HG_Parse
+    HG_Parse --> HG_DetermineTarget
+    HG_DetermineTarget --> HG_QueryPlan
+    HG_QueryPlan --> HG_User
+    HG_QueryPlan --> HG_Expense
+    HG_QueryPlan --> HG_CrossService
+    HG_User --> HG_Process
+    HG_Expense --> HG_Process
+    HG_CrossService --> HG_Process
+    HG_Process --> HG_Merge
+    HG_Merge --> HG_Response
+    HG_Response --> HG_Dispose
+    
     %% User Service flow
     US_Endpoint --> US_Resolver
     US_Resolver --> US_DL
@@ -81,6 +111,8 @@ flowchart TB
     GM_BatchExpense --> ES_Endpoint
     GS_BatchUser --> US_Endpoint
     GS_BatchExpense --> ES_Endpoint
+    HG_User --> US_Endpoint
+    HG_Expense --> ES_Endpoint
     
     classDef request fill:#f9f9f9,stroke:#333,stroke-width:1px
     classDef process fill:#bbf,stroke:#333,stroke-width:1px
@@ -88,8 +120,9 @@ flowchart TB
     classDef response fill:#dfd,stroke:#333,stroke-width:1px
     classDef database fill:#90ee90,stroke:#333,stroke-width:1px
     
-    class GM_Request,GS_Request,US_Endpoint,ES_Endpoint request
-    class GM_Parse,GM_Routes,GS_Parse,GS_SchemaCheck,GS_Delegate,US_Resolver,ES_Resolver,ES_UserLookup process
+    class GM_Request,GS_Request,HG_Request,US_Endpoint,ES_Endpoint request
+    class GM_Parse,GM_Routes,GS_Parse,GS_SchemaCheck,GS_Delegate,HG_Runtime,HG_Parse,HG_DetermineTarget,HG_QueryPlan,HG_User,HG_Expense,HG_CrossService,HG_Process,HG_Merge,US_Resolver,ES_Resolver,ES_UserLookup process
     class GM_BatchUser,GM_BatchExpense,GS_BatchUser,GS_BatchExpense,US_DL,US_Cache,ES_DL,ES_Cache optimization
-    class GM_Response,GS_Response,US_Response,ES_Response response
+    class GM_Response,GS_Response,HG_Response,US_Response,ES_Response response
     class US_DB,ES_DB database
+    class HG_Dispose process

@@ -209,7 +209,7 @@ For production deployments, follow these steps:
 1. **Set Production Environment Variables**:
 
    ```bash
-   export USER_SERVICE_URL=https://<prod-user-service>.workers.dev
+   export USER_SERVICE_URL=https://prod-user-service.workers.dev
    export EXPENSE_SERVICE_URL=https://prod-expense-service.workers.dev
    ```
 
@@ -221,17 +221,14 @@ For production deployments, follow these steps:
 
 3. **Convert to JavaScript Module**:
 
-   ```bash
-   echo "export default /* GraphQL */ \`$(cat supergraph.graphql)\`;" > supergraph.js
-   ```
+```javascript
+// supergraph.js
+export default /* GraphQL */ `
+  # Paste the contents of production supergraph.graphql here
+`;
+```
 
-4. **Validate Supergraph**:
-
-   ```bash
-   node -e "const supergraph = require('./supergraph.js').default; console.log('Supergraph validation successful');"
-   ```
-
-5. **Build and Deploy**:
+4. **Build and Deploy**:
    ```bash
    npm run build
    wrangler publish
