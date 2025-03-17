@@ -39,7 +39,7 @@ flowchart TD
 
     UserService --- UserDB[(User Data)]
     ExpenseService --- ExpenseDB[(Expense Data)]
-    HiveGateway --- SchemaRegistry[(Schema Registry)]
+    HiveGateway --- SchemaRegistry[(Pre-compiled Supergraph)]
 
     classDef service fill:#326ce5,stroke:#fff,stroke-width:1px,color:#fff
     classDef db fill:#45a386,stroke:#333,stroke-width:1px,color:#fff
@@ -87,7 +87,7 @@ flowchart TD
     HiveGateway --> UserService
     HiveGateway --> ExpenseService
 
-    HiveGateway --- SchemaRegistry[(Schema Registry)]
+    HiveGateway --- SchemaRegistry[(Pre-compiled Supergraph)]
 
     UserService --> UserDL
     UserDL --> UserCache
