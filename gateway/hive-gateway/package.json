@@ -13,7 +13,8 @@
     "codegen": "graphql-codegen --config codegen.ts",
     "build-supergraph": "mesh-compose -o supergraph.graphql",
     "hive-gateway": "npx hive-gateway supergraph",
-    "convert-supergraph": "node convert-schema.js supergraph.graphql supergraph-string.js && bun run format"
+    "convert-supergraph": "node convert-schema.js supergraph.graphql supergraph-string.js && bun run format",
+    "dev:hive-gateway": "bun build-supergraph && bun convert-supergraph && bun dev"
   },
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "^0.7.5",

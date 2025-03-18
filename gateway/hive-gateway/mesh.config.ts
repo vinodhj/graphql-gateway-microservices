@@ -20,6 +20,8 @@ export const composeConfig = defineComposeConfig({
         operationHeaders: {
           "Content-Type": "application/json",
           Accept: "application/json",
+          Authorization: "{context.headers.Authorization}",
+          "X-Project-Token": "{context.headers.X-Project-Token}",
         },
         retry: 3,
         timeout: 10000,
@@ -32,6 +34,8 @@ export const composeConfig = defineComposeConfig({
         operationHeaders: {
           "Content-Type": "application/json",
           Accept: "application/json",
+          Authorization: "{context.headers.Authorization}",
+          "X-Project-Token": "{context.headers.X-Project-Token}",
         },
         retry: 3,
         timeout: 10000,
