@@ -14,6 +14,14 @@ export interface Env {
 interface Fetcher {
   fetch: typeof fetch;
 }
+/*
+ * Cloudflare Workers free plan limitations (1,000 requests per minute burst limit and 100,000 daily quota)
+ * The rate limiting implementation is based on the token bucket algorithm
+ * The bucket capacity is 20 tokens and the refill rate is 13.33 tokens per second (800 tokens per minute)
+ * The rate limiting is applied per client IP address
+ * In-memory storage for rate limiting is used
+ */
+const ipBuckets = new Map();
 
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
@@ -30,6 +38,57 @@ export default {
       });
     }
     try {
+      // Rate limiting
+      const clientIP = request.headers.get("CF-Connecting-IP");
+      if (!clientIP) {
+        return new Response("Client IP not detected", { status: 403 });
+      }
+
+      console.log(`Client IP: ${clientIP}`);
+
+      // Configuration
+      const BUCKET_CAPACITY = 20; // Maximum burst size
+      const REFILL_RATE = 13.33; // Tokens per second (800/60)
+
+      // Get or create bucket
+      let bucket = ipBuckets.get(clientIP);
+      if (!bucket) {
+        bucket = { tokens: BUCKET_CAPACITY, lastRefill: Date.now() };
+        ipBuckets.set(clientIP, bucket);
+      }
+
+      console.log(`Tokens: ${bucket.tokens}`);
+
+      // Refill tokens based on time elapsed
+      const now = Date.now();
+      const secondsElapsed = (now - bucket.lastRefill) / 1000;
+      bucket.tokens = Math.min(BUCKET_CAPACITY, bucket.tokens + secondsElapsed * REFILL_RATE);
+      bucket.lastRefill = now;
+
+      console.log(`Tokens after refill: ${bucket.tokens}`);
+
+      // Check if rate limited
+      if (bucket.tokens < 1) {
+        // Add some logging for your POC
+        console.log(`Rate limited IP: ${clientIP}`);
+
+        return new Response(
+          JSON.stringify({
+            error: "Too many requests. Please try again later.",
+          }),
+          {
+            status: 429,
+            headers: {
+              "Content-Type": "application/json",
+              "Retry-After": "5",
+            },
+          },
+        );
+      }
+
+      // Consume a token
+      bucket.tokens -= 1;
+
       const isDevelopment = env.WORKER_ENV === "dev";
       console.log(`Running in ${isDevelopment ? "development" : "production"} mode`);
       console.log(`User service URL: ${env.USER_SERVICE_URL}`);
