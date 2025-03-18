@@ -11,6 +11,7 @@
 		"enabled": true
 	},
   "compatibility_flags": ["nodejs_compat"],
+  "minify": true,
   /**
    * Smart Placement
    * Docs: https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement

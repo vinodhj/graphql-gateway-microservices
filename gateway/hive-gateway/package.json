@@ -7,11 +7,13 @@
     "bundle-size": "wrangler build && wrangler deploy --dry-run",
     "dev": "(kill -9 $(lsof -t -i:7500) || true) && wrangler dev --name graphql-tools --port 7500 --inspector-port 7300",
     "start": "wrangler dev",
+    "format": "prettier --write \"**/*.{js,ts,tsx,md,json,mts,d.ts}\" --no-error-on-unmatched-pattern",
     "test": "vitest",
     "cf-typegen": "wrangler types",
     "codegen": "graphql-codegen --config codegen.ts",
     "build-supergraph": "mesh-compose -o supergraph.graphql",
-    "hive-gateway": "npx hive-gateway supergraph"
+    "hive-gateway": "npx hive-gateway supergraph",
+    "convert-supergraph": "node convert-schema.js supergraph.graphql supergraph-string.js && bun run format"
   },
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "^0.7.5",
