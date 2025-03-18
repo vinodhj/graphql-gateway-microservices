@@ -33,8 +33,6 @@ export default {
     try {
       const isDevelopment = env.WORKER_ENV === "dev";
       console.log(`Running in ${isDevelopment ? "development" : "production"} mode`);
-      console.log(`User service URL: ${env.USER_SERVICE_URL}`);
-      console.log(`Expense service URL: ${env.EXPENSE_SERVICE_URL}`);
 
       // Create the gateway runtime
       const gateway = createGatewayRuntime({

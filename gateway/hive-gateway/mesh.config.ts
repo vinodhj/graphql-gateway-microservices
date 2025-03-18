@@ -1,12 +1,21 @@
 import { loadGraphQLHTTPSubgraph, defineConfig as defineComposeConfig } from "@graphql-mesh/compose-cli";
 import { default as additionalResolvers$0 } from "./src/additional-resolvers";
 import { defineConfig as defineGatewayConfig } from "@graphql-hive/gateway";
+import dotenv from "dotenv";
+dotenv.config();
+
+let USER_SERVICE_URL = process.env.LOCAL_USER_SERVICE_URL;
+let EXPENSE_SERVICE_URL = process.env.LOCAL_EXPENSE_SERVICE_URL;
+if (process.env.IS_ENV === "PROD") {
+  USER_SERVICE_URL = process.env.PROD_USER_SERVICE_URL;
+  EXPENSE_SERVICE_URL = process.env.PROD_EXPENSE_SERVICE_URL;
+}
 
 export const composeConfig = defineComposeConfig({
   subgraphs: [
     {
       sourceHandler: loadGraphQLHTTPSubgraph("UserService", {
-        endpoint: "http://localhost:7501/graphql",
+        endpoint: USER_SERVICE_URL || "",
         method: "POST",
         operationHeaders: {
           "Content-Type": "application/json",
@@ -18,7 +27,7 @@ export const composeConfig = defineComposeConfig({
     },
     {
       sourceHandler: loadGraphQLHTTPSubgraph("ExpenseService", {
-        endpoint: "http://localhost:7502/graphql",
+        endpoint: EXPENSE_SERVICE_URL || "",
         method: "POST",
         operationHeaders: {
           "Content-Type": "application/json",
